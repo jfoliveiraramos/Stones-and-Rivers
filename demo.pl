@@ -10,6 +10,7 @@ Click a to go back a position
 
 */
 
+/* 
 getState(start, mid, Input) :-
     Input is 100, % ASCCI code for d
     !,
@@ -46,3 +47,23 @@ gameLoop(OldState) :-
     gameLoop(NewState).
 
 start :- gameLoop(start).
+
+*/
+
+:- use_module(library(random)).
+
+start(T) :- 
+    write('Game Start'), nl,
+    write('Game Over'), nl.
+
+pick_turn(0, 'Square').
+pick_turn(1, 'Circle').
+
+pick_turn(T) :-
+    random(0,2,P),
+    pick_turn(P, T).
+
+play :-
+    pick_turn(Turn),
+    write(Turn), write(' starts'), nl,
+    start(Turn).
