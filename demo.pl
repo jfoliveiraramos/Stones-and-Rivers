@@ -107,3 +107,6 @@ play :-
     random_turn(Turn),
     write(Turn), write(' starts'), nl,
     start(Turn).
+
+
+test_list(X) :- X = [1,2,3].
