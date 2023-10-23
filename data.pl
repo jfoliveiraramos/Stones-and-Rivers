@@ -31,42 +31,79 @@ sprite(circle, 'O').
 sprite(square_score, 'x').
 sprite(circle_score, 'o').
 
-display_row([]):- nl.
+empty_line(0, _) :- !, nl.
 
-display_row([P | T] ):-
+empty_line(X, 0) :- !, nl.
+
+empty_line(X, N) :-
+    write(' | '),
+    X1 is X - 1,
+    empty_line(X1, N).
+
+display_sprite(P, L, L) :-
+    !,
     sprite(P, S),
-    write(S),
-    write(' '),
-    display_row(T).
+    write(' '), write(S), write('-').
+
+display_sprite(P, _, 1) :-
+    !,
+    sprite(P, S),
+    write('-'), write(S), write(' ').
+
+display_sprite(P, _, _) :-
+    sprite(P, S),
+    write('-'), write(S), write('-').
+
+display_row([], _, 0):- nl.
+
+display_row([P | T], L, C):-
+    display_sprite(P, L, C),
+    C1 is C - 1,
+    display_row(T, L, C1).
 
 display_board([]).
 
 display_board([Row | T], N) :-
     N // 10 > 0,
     !,
+    write('   '),
+    length(Row, L),
+    empty_line(L, N),
     write(N),
     N1 is N + 1,
     write(' '),
-    display_row(Row),
+    display_row(Row, L, L),
     display_board(T, N1).
 
 display_board([Row | T], N):-
+    write('   '),
+    length(Row, L),
+    empty_line(L, N),
     write(N),
     N1 is N + 1,
-    write('  '),
-    display_row(Row),
+    write('  '), 
+    display_row(Row, L, L),
     display_board(T, N1).
 
 display_gridX(X, X) :- !.
 
 display_gridX(N, X):-
+    N // 10 > 0,
+    !,
+    write(' '),
+    write(N),
+    N1 is N + 1,
+    display_gridX(N1, X).
+
+display_gridX(N, X):-
+    write(' '),
     write(N),
     write(' '),
     N1 is N + 1,
     display_gridX(N1, X).
 
 display_x(X) :-
-    write('  '),
+    write('   '),
     display_gridX(0, X), nl.
 
 paint :-
