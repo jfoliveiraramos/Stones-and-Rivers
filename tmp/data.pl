@@ -1,5 +1,3 @@
-board_size(13, 14).
-
 board(B) :-
     B = [
         [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty],
@@ -17,6 +15,11 @@ board(B) :-
         [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty],
         [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty]
     ].
+
+board_size(W, H) :-
+    board(B),
+    length(B, H) :-
+    B = [R | T]:
 
 :-use_module(library(lists)).
 

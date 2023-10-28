@@ -9,8 +9,8 @@ Click d to advance a position
 Click a to go back a position
 
 */
+/*
 
-/* 
 getState(start, mid, Input) :-
     Input is 100, % ASCCI code for d
     !,
@@ -48,8 +48,8 @@ gameLoop(OldState) :-
 
 start :- gameLoop(start).
 
-*/
 
+*/
 :- use_module(library(random)).
 :- consult('data.pl').  
 

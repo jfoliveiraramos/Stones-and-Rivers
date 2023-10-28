@@ -20,7 +20,7 @@ member of the group), as well as an indication of the contribution (in percentag
 of each member of the group to the assignment;*
 
 
-## Installatino & Execution
+## Installation & Execution
 
 *Include all the necessary steps for the correct execution of the game in both
 Linux and Windows environments (in addition to the installation of SICStus Prolog 4.8).*
