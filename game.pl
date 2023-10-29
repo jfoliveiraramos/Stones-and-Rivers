@@ -1,33 +1,5 @@
-% # Data
-
-piece_to_text(empty, ' ') :- !.
-piece_to_text(square, 'A') :- !.
-piece_to_text(circle, 'B') :- !.
-piece_to_text(square_score, 'b') :- !.
-piece_to_text(circle_score, 'a') :- !.  
-
-board(B) :-
-    B = [
-        [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty],
-        [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty],
-        [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty],
-        [empty, empty, empty, empty, square_score, square_score, square_score, square_score, square_score, empty, empty, empty, empty],
-        [empty, empty, empty, circle, circle, circle, circle, circle, circle, circle, empty, empty, empty],
-        [empty, empty, empty, circle, circle, circle, circle, circle, circle, circle, empty, empty, empty],
-        [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty],
-        [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty],
-        [empty, empty, empty, square, square, square, square, square, square, square, empty, empty, empty],
-        [empty, empty, empty, square, square, square, square, square, square, square, empty, empty, empty],
-        [empty, empty, empty, empty, circle_score, circle_score, circle_score, circle_score, circle_score, empty, empty, empty, empty],
-        [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty],
-        [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty],
-        [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty, empty]
-    ].
-
-board_size(Board, Width, Height) :-
-    Board = [Row | _],
-    length(Board, Height),
-    length(Row, Width).
+:- use_module('piece_sprite.pl').
+:- use_module('data.pl').
 
 % # Draw
 
@@ -55,6 +27,8 @@ draw_top_x_axis(Width) :-
     nl,nl.
 
 draw_bottom_x_axis(Width) :-
+    draw_vertical_connection_line(Width),
+    nl,
     write('     '),
     draw_x(Width, 0),
     nl,nl.
@@ -73,29 +47,33 @@ draw_vertical_connection_line(N) :-
 
 % ## Draw Rows
 
-draw_piece_middle([]) :- !.
+draw_pieces([], _) :- !.
 
-draw_piece_middle([Piece | Pieces]) :-
-    piece_to_text(Piece, T),
-    format('-   ~s   -', [T]),
-    draw_piece_middle(Pieces).
+draw_pieces([Piece | Pieces], mid) :-
+    !,
+    piece_sprite(Piece, mid, T),
+    format('- ~s -', [T]),
+    draw_pieces(Pieces, mid).
+
+draw_pieces([Piece | Pieces], Pos) :-
+    piece_sprite(Piece, Pos, T),
+    format('  ~s  ', [T]),
+    draw_pieces(Pieces, Pos).
 
 draw_row(Row, Y) :-
     Y // 10 =:= 0, !,
     length(Row, Width),
     draw_vertical_connection_line(Width),
-    nl,
-    format('~d   -', [Y]), draw_piece_middle(Row),format('-   ~d', [Y]),
-    nl,
-    nl.
+    write('     '),         draw_pieces(Row, top),      nl,     
+    format('~d   -', [Y]),  draw_pieces(Row, mid),      format('-   ~d', [Y]), nl,
+    write('     '),         draw_pieces(Row, bottom),   nl.
 
 draw_row(Row, Y) :-
     length(Row, Width),
     draw_vertical_connection_line(Width),
-    nl,
-    format('~d  -', [Y]), draw_piece_middle(Row),format('-  ~d', [Y]),
-    nl,
-    nl.
+    write('     '),         draw_pieces(Row, top),      nl,     
+    format('~d  -', [Y]),  draw_pieces(Row, mid),      format('-   ~d', [Y]), nl,
+    write('     '),         draw_pieces(Row, bottom),   nl.
 
 draw_rows([], H, H) :- !.
 
