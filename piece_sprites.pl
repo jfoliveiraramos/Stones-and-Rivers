@@ -5,12 +5,12 @@ piece_sprite(emptySlot, bottom,    '     ') :- !.
 
 % Square Target
 piece_sprite(squareTrg, top,       '  +  ') :- !.
-piece_sprite(squareTrg, mid,       '+ A +') :- !.
+piece_sprite(squareTrg, mid,       '+ a +') :- !.
 piece_sprite(squareTrg, bottom,    '  +  ') :- !.
 
 % Circle Target
 piece_sprite(circleTrg, top,       '  +  ') :- !.
-piece_sprite(circleTrg, mid,       '+ B +') :- !.
+piece_sprite(circleTrg, mid,       '+ b +') :- !.
 piece_sprite(circleTrg, bottom,    '  +  ') :- !.
 
 % Square Scored

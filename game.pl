@@ -1,6 +1,7 @@
 :- ensure_loaded('draw.pl').
 :- use_module(library(random)).
 :- use_module(library(lists)).
+:- use_module(library(between)).
 
 % # Play
 
@@ -14,76 +15,167 @@ decide_first_turn(T) :-
 swicth_turn(player_a, player_b).
 swicth_turn(player_b, player_a).
 
-piece_in(X, Y, Board, Piece) :-
+piece_in(Piece, X-Y) :-
+    board(Board),
     nth0(Y, Board, Row),
     nth0(X, Row, Piece).
 
-validate_piece(Turn, Piece):- belongs_to(Piece, Turn), !.
-validate_piece(Turn, Piece):-
-    \+ belongs_to(Piece, Turn),
-    repeat,
-    write('Invalid! Provive a valid X-Y\n'),
+validate_piece(X-Y, Turn, Piece):- 
+    piece_in(Piece, X-Y),
+    belongs_to(Piece, Turn). 
+
+get_piece(Turn, Piece, X, Y) :-
+    write('Provide the coordinates of the piece you wish to play, as follows: X-Y\n'),
     read(X-Y),
+    validate_piece(X-Y, Turn, Piece), !.
+
+get_piece(Turn, Piece, X, Y) :-
+    repeat,
+    write('Invalid! Provide a valid piece\n'),
+    read(X-Y),
+    validate_piece(X-Y, Turn, Piece).
+
+replace_piece(X, Y, NewPiece) :-
     board(Board),
-    piece_in(X, Y, Board, Piece1),
-    belongs_to(Piece1, Turn).
+    nth0(Y, Board, Row, RestBoard),
+    nth0(X, Row, _, RestRow), 
+    nth0(X, NewRow, NewPiece, RestRow),
+    nth0(Y, NewBoard, NewRow, RestBoard),
+    retract((board(Board) :- !)),
+    asserta((board(NewBoard) :- !)).
 
 flip(squareStn, horizontal, squareHrz) :- !.
-flip(squareStn, veritcal, squareVrt) :- !.
+flip(squareStn, vertical, squareVrt) :- !.
 flip(circleStn, horizontal, circleHrz) :- !.
-flip(circleStn, veritcal, circleVrt) :- !.
-flip(squareHrz, _, squareStn) :- !.
-flip(squareVrt, _, squareStn) :- !.
-flip(circleHrz, _, circleStn) :- !.
-flip(circleVrt, _, circleStn) :- !.
+flip(circleStn, vertical, circleVrt) :- !.
+flip(squareHrz, squareStn) :- !.
+flip(squareVrt, squareStn) :- !.
+flip(circleHrz, circleStn) :- !.
+flip(circleVrt, circleStn) :- !.
 
-move_option(1, move).
-move_option(2, flip).
+rotate(squareVrt, squareHrz) :- !.
+rotate(squareHrz, squareVrt) :- !.
+rotate(circleVrt, circleHrz) :- !.
+rotate(circleHrz, circleVrt) :- !.
 
-select_stone_move(Move) :-
-    write('Select a move for the '),
-    write(' stone:\n'),
+play_option(1, move).
+play_option(2, flip).
+play_option(3, rotate).
+
+validate_option(Option, L-U) :- between(L, U, Option).
+
+select_stone_play(Move) :-
     write('1 - Move\n'),
     write('2 - Flip\n'),
+    write('Select a move for the stone\n'),
     read(Option),
-    move_option(Option, Move).
+    validate_option(Option, 1-2),
+    play_option(Option, Move), 
+    !.
 
-select_move(squareStn, Move) :- select_stone_move(Move).
-select_move(circleStn, Move) :- select_stone_move(Move).
+select_stone_play(Move) :-
+    repeat,
+    write('Invalid! Provide a valid option\n'),
+    read(Option),
+    validate_option(Option, 1-2),
+    play_option(Option, Move).
 
-execute_move(move, X, Y, _Piece) :-
-    write('Provide the coordinates of the destination, as follows: X-Y\n'),
-    read(X1-Y1),
+select_river_play(Move) :-
+    write('1 - Move\n'),
+    write('2 - Flip\n'),
+    write('3 - Rotate\n'),
+    write('Select a move for the river\n'),
+    read(Option),
+    validate_option(Option, 1-3),
+    play_option(Option, Move), 
+    !.
+
+select_river_play(Move) :-
+    repeat,
+    write('Invalid! Provide a valid option\n'),
+    read(Option),
+    validate_option(Option, 1-3),
+    play_option(Option, Move).
+
+select_play(squareStn, Move) :- !, select_stone_play(Move).
+select_play(circleStn, Move) :- !, select_stone_play(Move).
+
+select_play(squareVrt, Move) :- !, select_river_play(Move).
+select_play(squareHrz, Move) :- !, select_river_play(Move).
+select_play(circleVrt, Move) :- !, select_river_play(Move).
+select_play(circleHrz, Move) :- !, select_river_play(Move).
+
+get_direction(1, horizontal) :- !.
+get_direction(2, vertical) :- !.    
+
+validate_move(X, Y, X1, Y1) :- 
     board(Board),
     board_size(Board, W, H),
     X1 < W, X1 >= 0, 
     Y1 < H, Y1 >= 0,
-    %only ortogonal moves
     (X1 =:= X, Y1 =:= Y + 1; X1 =:= X, Y1 =:= Y - 1; X1 =:= X + 1, Y1 =:= Y; X1 =:= X - 1, Y1 =:= Y),
-    piece_in(X1, Y1, Board, emptySlot),
-    write('Valid Move!\n').
+    piece_in(emptySlot, X1-Y1).
 
-execute_move(flip, X, Y, Piece) :-
-    flip(Piece, _, NewPiece),
-    board(Board),
-    nth0(Y, Board, Row, RestBoard),
-    nth0(X, Row, Piece, RestRow), 
-    nth0(X, NewRow, NewPiece, RestRow),
-    nth0(Y, NewBoard, NewRow, RestBoard),
-    retract(board(Board) :- !),
-    asserta(board(NewBoard) :- !).
+get_move(X, Y, X1, Y1) :-
+    write('Provide the coordinates of the move, as follows: X-Y\n'),
+    read(X1-Y1),
+    validate_move(X, Y, X1, Y1),
+    !.
+    
+get_move(X, Y, X1, Y1) :- 
+    repeat,
+    write('Invalid! Provide a valid X-Y\n'),
+    read(X1-Y1),
+    validate_move(X, Y, X1, Y1).
 
-game_loop(Turn) :-
-    board(B),
-    draw(B),
+execute_play(move, X, Y, Piece) :-
+    get_move(X, Y, X1, Y1),
+    replace_piece(X, Y, emptySlot),
+    replace_piece(X1, Y1, Piece).
+
+execute_play(flip, X, Y, Piece) :-
+    (Piece = squareStn; Piece = circleStn),
+    write('1 - Horizontal\n'),
+    write('2 - Vertical\n'),
+    write('Provide the direction of the flip\n'),
+    read(Option),
+    validate_option(Option, 1-2),
+    get_direction(Option, Direction),
+    flip(Piece, Direction, Flipped),
+    replace_piece(X, Y, Flipped), !.
+
+execute_play(flip, X, Y, Piece) :-
+    (Piece = squareStn; Piece = circleStn), !,
+    repeat,
+    write('Invalid! Provide a valid direction\n'),
+    read(Option),
+    validate_option(Option, 1-2),
+    get_direction(Option, Direction),
+    flip(Piece, Direction, Flipped),
+    replace_piece(X, Y, Flipped).
+
+execute_play(flip, X, Y, Piece) :-
+    !,
+    flip(Piece, Flipped),
+    replace_piece(X, Y, Flipped).
+
+execute_play(rotate, X, Y, Piece) :-
+    !,
+    rotate(Piece, Rotated),
+    replace_piece(X, Y, Rotated).
+
+play_turn(Turn) :-
     turn(Turn, _, TurnText),
     write(TurnText),
-    write('Provide the coordinates of the piece you wish to play, as follows: X-Y\n'),
-    read(X-Y),
-    piece_in(X, Y, B, Piece),
-    validate_piece(Turn, Piece),
-    select_move(Piece, Move),
-    execute_move(Move, X, Y, Piece),
+    get_piece(Turn, Piece, X, Y),
+    select_play(Piece, Move),
+    execute_play(Move, X, Y, Piece).
+
+game_loop(Turn) :-
+    repeat,
+    board(B),
+    draw(B),
+    play_turn(Turn),
     swicth_turn(Turn, NewTurn), 
     game_loop(NewTurn).
 
