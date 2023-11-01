@@ -1,29 +1,57 @@
+stone(squareStn) :- !.
+stone(circleStn) :- !.
+river(squareVrt) :- !.
+river(circleVrt) :- !.
+river(squareHrz) :- !.
+river(circleHrz) :- !.
+
+horizontal(squareHrz) :- !.
+horizontal(circleHrz) :- !.
+
+vertical(squareVrt) :- !.
+vertical(circleVrt) :- !.
+
+circle(circleStn) :- !.
+circle(circleVrt) :- !.
+circle(circleHrz) :- !.
+
+square(squareStn) :- !.
+square(squareVrt) :- !.
+square(squareHrz) :- !.
+
+piece(Piece) :- stone(Piece) ; river(Piece).
+
+belongs_to(Piece, player_a) :- square(Piece), !.
+belongs_to(Piece, player_b) :- circle(Piece), !.
+
 :- dynamic board/1.
-
-belongs_to(squareStn, player_a).
-belongs_to(squareVrt, player_a).
-belongs_to(squareHrz, player_a).
-
-belongs_to(circleStn, player_b).
-belongs_to(circleVrt, player_b).
-belongs_to(circleHrz, player_b).
 
 board([
     [emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot],
     [emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot],
     [emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot],
-    [emptySlot, emptySlot, emptySlot, emptySlot, squareTrg, squareTrg, squareTrg, squareTrg, squareTrg, emptySlot, emptySlot, emptySlot, emptySlot],
+    [emptySlot, emptySlot, emptySlot, emptySlot, squareScr, squareScr, squareScr, squareScr, squareScr, emptySlot, emptySlot, emptySlot, emptySlot],
     [emptySlot, emptySlot, emptySlot, circleStn, circleStn, circleStn, circleStn, circleStn, circleStn, circleStn, emptySlot, emptySlot, emptySlot],
     [emptySlot, emptySlot, emptySlot, circleStn, circleStn, circleStn, circleStn, circleStn, circleStn, circleStn, emptySlot, emptySlot, emptySlot],
     [emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot],
     [emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot],
-    [emptySlot, emptySlot, emptySlot, squareStn, squareStn, squareStn, squareStn, squareStn, squareStn, squareStn, emptySlot, emptySlot, emptySlot],
-    [emptySlot, emptySlot, emptySlot, squareStn, squareStn, squareStn, squareStn, squareStn, squareStn, squareStn, emptySlot, emptySlot, emptySlot],
-    [emptySlot, emptySlot, emptySlot, emptySlot, circleTrg, circleTrg, circleTrg, circleTrg, circleTrg, emptySlot, emptySlot, emptySlot, emptySlot],
+    [emptySlot, emptySlot, emptySlot, squareHrz, squareStn, squareStn, squareStn, squareStn, squareStn, squareStn, emptySlot, emptySlot, emptySlot],
+    [emptySlot, emptySlot, emptySlot, squareVrt, squareStn, squareStn, squareStn, squareStn, squareStn, squareStn, emptySlot, emptySlot, emptySlot],
+    [emptySlot, emptySlot, emptySlot, emptySlot, circleScr, circleScr, circleScr, circleScr, circleScr, emptySlot, emptySlot, emptySlot, emptySlot],
     [emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot],
     [emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot],
     [emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot, emptySlot]
 ]) :- !.
+
+backup_board :-
+    board(B),
+    retractall(backup_board(_)),
+    asserta((backup_board(B) :- !)).
+
+restore_board :-
+    backup_board(B),
+    retractall(board(_)),
+    asserta(board(B)).
 
 board_size(Board, Width, Height) :-
     Board = [Row | _],
