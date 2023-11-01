@@ -22,10 +22,40 @@ of each member of the group to the assignment;*
 
 ## Installation & Execution
 
+To run the game, we need to install SICStus Prolog 4.8 and then change his font to 7. After that, we just must consult the path were the game is (game.pl) and then play. 
+
+
 *Include all the necessary steps for the correct execution of the game in both
 Linux and Windows environments (in addition to the installation of SICStus Prolog 4.8).*
 
 ## Game Description
+
+Stones and Rivers is a 2 player strategy game. The goal is to be the first player to get five of the fourteen double-sided pieces into the opponent's score area with the stone side facing up. 
+
+Each player has fourteen pieces, and each piece has two sides, a stone side that have limited movement on their own but block player’s pieces and a river side for creating sweeping movement across the board or pushing obstacles away. 
+
+The players will decide which one is the circle player and which is the square player and then who starts first. After that, they must choose what movement to do with their piece: 
+
+- Flip a piece and rotate - the player can flip both stones and rivers; if the flipped piece is now a river, you can choose the direction up/down or left/right.
+
+- Rotate a river - rotate a river ninety degrees (up/down to left/right or left/right to up/down) and align it along the grid. 
+
+- Move a piece - Both stones and rivers can be moved. Pieces must be placed on the intersections of the grid. Pieces can only move up, down, left, or right. No diagonals or hopping. A piece cannot end its turn on another piece or move off the board. You cannot move in or through the other player’s score area.
+
+- River Movement - If a piece moves onto a River, it can move any number of spaces in the river’s indicated directions until it encounters another piece.
+
+- Pushing with a river - When moving a river, when you would land on a piece you can choose to push it in any number of spaces in one the indicated directions.
+
+If one or more pieces are a river in your score area, the game continues until all 5 pieces in your scoring area are stones. Pieces in a score area can be moved, flipped or rotated. 
+The game ends when a player gets five stone pieces in their scoring area. 
+
+Links used to gather information: 
+
+- https://static1.squarespace.com/static/5700bc15e321408302cf9af0/t/646678cb92b5d632c7bb4528/1684437197944/stones+and+rivers+rules.pdf
+
+- https://static1.squarespace.com/static/5700bc15e321408302cf9af0/t/6406b9cc4a4bd62500066c76/1678162382902/stones+and+rivers+official+rules+-+full+art.pdf
+
+- https://bigblueheron.itch.io/stones-and-rivers
 
 *A brief description of the game and its rules (up to 350 words); you should also
 include the links used to gather information (official game website, rule book, etc.)*
@@ -69,6 +99,10 @@ algorithm), considering the evaluation of the game state, as described above.*
 issues), as well as possible improvements (roadmap) (up to 250 words);*
 
 ## Bibliography
+
+- https://static1.squarespace.com/static/5700bc15e321408302cf9af0/t/6406b9cc4a4bd62500066c76/1678162382902/stones+and+rivers+official+rules+-+full+art.pdf
+- https://static1.squarespace.com/static/5700bc15e321408302cf9af0/t/646678cb92b5d632c7bb4528/1684437197944/stones+and+rivers+rules.pdf
+- https://bigblueheron.itch.io/stones-and-rivers
 
 *List of books, papers, web pages and other resources used during the development of
 the assignment.*
