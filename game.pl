@@ -43,7 +43,6 @@ get_direction(2, vertical) :- !.
 
 move(X-Y-Piece/X1-Y1-_/normalMove) :-
     !,
-    write('Normal Movement!\n'),
     replace_piece(X, Y, emptySlot),
     replace_piece(X1, Y1, Piece).
 
@@ -68,7 +67,6 @@ move(X-Y-River/X1-Y1-Piece/pushMove) :-
     read(Input),
     validate_option(Input, 1-Length),
     nth1(Input, Moves, Move),
-    write(Move), nl,
     move(Move).
 
 execute_play(move, X, Y, _Piece) :-
