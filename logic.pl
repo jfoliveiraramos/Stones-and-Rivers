@@ -1,24 +1,18 @@
 :- use_module(library(between)).
 
-piece_in(Piece, X-Y) :-
-    board(Board),
+piece_in(Board, Piece, X-Y) :-
     nth0(Y, Board, Row),
     nth0(X, Row, Piece).
 
-validate_piece(X-Y, Turn, Piece):- 
-    piece_in(Piece, X-Y),
-    belongs_to(Piece, Turn). 
+validate_piece([X-Y, Board, Turn]) :-
+    piece_in(Board, Piece, X-Y),
+    belongs_to(Piece, Turn).
 
-get_piece(Turn, Piece, X, Y) :-
+get_piece(Board, Turn, X, Y, Piece) :-
     write('Provide the coordinates of the piece you wish to play, as follows: X-Y\n'),
-    read(X-Y),
-    validate_piece(X-Y, Turn, Piece), !.
-
-get_piece(Turn, Piece, X, Y) :-
-    repeat,
-    write('Invalid! Provide a valid piece\n'),
-    read(X-Y),
-    validate_piece(X-Y, Turn, Piece).
+    read_input(X-Y, validate_piece, [Board, Turn], 'piece'),
+    piece_in(Board, Piece, X-Y),
+    !.
 
 % -----------------------------------------------------
 
@@ -39,52 +33,6 @@ rotate(circleHrz, circleVrt) :- !.
 
 % -----------------------------------------------------
 
-play_option(1, move).
-play_option(2, flip).
-play_option(3, rotate).
-
-validate_option(Option, L-U) :- between(L, U, Option).
-
-select_stone_play(Move) :-
-    write('1 - Move\n'),
-    write('2 - Flip\n'),
-    write('Select a move for the stone\n'),
-    read(Option),
-    validate_option(Option, 1-2),
-    play_option(Option, Move), 
-    !.
-
-select_stone_play(Move) :-
-    repeat,
-    write('Invalid! Provide a valid option\n'),
-    read(Option),
-    validate_option(Option, 1-2),
-    play_option(Option, Move).
-
-select_river_play(Move) :-
-    write('1 - Move\n'),
-    write('2 - Flip\n'),
-    write('3 - Rotate\n'),
-    write('Select a move for the river\n'),
-    read(Option),
-    validate_option(Option, 1-3),
-    play_option(Option, Move), 
-    !.
-
-select_river_play(Move) :-
-    repeat,
-    write('Invalid! Provide a valid option\n'),
-    read(Option),
-    validate_option(Option, 1-3),
-    play_option(Option, Move).
-
-select_play(squareStn, Move) :- !, select_stone_play(Move).
-select_play(circleStn, Move) :- !, select_stone_play(Move).
-
-select_play(squareVrt, Move) :- !, select_river_play(Move).
-select_play(squareHrz, Move) :- !, select_river_play(Move).
-select_play(circleVrt, Move) :- !, select_river_play(Move).
-select_play(circleHrz, Move) :- !, select_river_play(Move). 
 
 % -----------------------------------------------------
 

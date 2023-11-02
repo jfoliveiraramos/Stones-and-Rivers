@@ -5,12 +5,34 @@
 
 % # Play
 
-turn(player_b, 0, 'Player A turn.\n').
-turn(player_b, 1, 'Player B turn.\n').
+play_option(1, move).
+play_option(2, flip).
+play_option(3, rotate).
 
-decide_first_turn(T) :-
-    random(0, 2, R),
-    turn(T, R, _).
+select_stone_play(Move) :-
+    write('1 - Move\n'),
+    write('2 - Flip\n'),
+    write('Select a move for the stone\n'),
+    read_input(Option, validate_option, [1-2]),
+    play_option(Option, Move), 
+    !.
+
+select_river_play(Move) :-
+    write('1 - Move\n'),
+    write('2 - Flip\n'),
+    write('3 - Rotate\n'),
+    write('Select a move for the river\n'),
+    read_input(Option, validate_option, [1-3]),
+    play_option(Option, Move), 
+    !.
+
+select_play(squareStn, Move) :- !, select_stone_play(Move).
+select_play(circleStn, Move) :- !, select_stone_play(Move).
+
+select_play(squareVrt, Move) :- !, select_river_play(Move).
+select_play(squareHrz, Move) :- !, select_river_play(Move).
+select_play(circleVrt, Move) :- !, select_river_play(Move).
+select_play(circleHrz, Move) :- !, select_river_play(Move). 
 
 switch_turn(player_a, player_b).
 switch_turn(player_b, player_a).
@@ -77,21 +99,10 @@ execute_play(flip, X, Y, Piece) :-
     write('1 - Horizontal\n'),
     write('2 - Vertical\n'),
     write('Provide the direction of the flip\n'),
-    read(Option),
-    validate_option(Option, 1-2),
+    read(Option, 1-2),
     get_direction(Option, Direction),
     flip(Piece, Direction, Flipped),
     replace_piece(X, Y, Flipped), !.
-
-execute_play(flip, X, Y, Piece) :-
-    (Piece = squareStn; Piece = circleStn), !,
-    repeat,
-    write('Invalid! Provide a valid direction\n'),
-    read(Option),
-    validate_option(Option, 1-2),
-    get_direction(Option, Direction),
-    flip(Piece, Direction, Flipped),
-    replace_piece(X, Y, Flipped).
 
 execute_play(flip, X, Y, Piece) :-
     !,
@@ -103,18 +114,21 @@ execute_play(rotate, X, Y, Piece) :-
     rotate(Piece, Rotated),
     replace_piece(X, Y, Rotated).
 
-play_turn(Turn, Turn) :-
+play_turn(Turn-Board-Players, NewTurn-Board-Players) :-
     turn(Turn, _, TurnText),
     write(TurnText),
-    get_piece(Turn, Piece, X, Y),
-    select_play(Piece, Move),
-    execute_play(Move, X, Y, Piece).
-    % switch_turn(Turn, NewTurn).
+    get_piece(Board, Turn, X, Y, Piece),
+    format('Select a play for the ~w at ~d,~d\n', [Piece, X, Y]),
+    % select_play(Piece, Move),
+    % execute_play(Move, X, Y, Piece).
+    read(_),
+    switch_turn(Turn, NewTurn).
 
-game_loop(Turn-Board-Players) :-
+game_loop(GameState) :-
+    GameState = _-Board-_,
     draw(Board),
-    %play_turn(Turn, NewTurn),
-    game_loop(Turn-Board-Players).
+    play_turn(GameState, NewGameState),
+    game_loop(NewGameState).
 
 
      
