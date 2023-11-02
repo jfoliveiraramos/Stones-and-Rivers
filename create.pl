@@ -1,9 +1,9 @@
-turn(player_a, 0, 'Player A turn.\n').
-turn(player_b, 1, 'Player B turn.\n').
+get_turn(player_a, 0).
+get_turn(player_b, 1).
 
 decide_first_turn(T) :-
     random(0, 2, R),
-    turn(T, R, _).
+    get_turn(T, R).
 
 create_row(Width, Row) :-
     findall(emptySlot, between(1, Width, _), Row).

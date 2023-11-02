@@ -106,12 +106,37 @@ draw_rows([Row | Rows], H, Y) :-
     Y1 is Y + 1,
     draw_rows(Rows, H, Y1).
 
-% ## Draw Board
-
-draw(Board) :-
-    clear_screen,
+draw_board(Board) :-
     board_size(Board, W, H),
     draw_top_x_axis(W),
     draw_rows(Board, H, 0),
-    draw_bottom_x_axis(W), 
+    draw_bottom_x_axis(W).
+
+player(hum, 'Human') :- !.
+player(pc1, 'Computer (Easy)') :- !.
+player(pc2, 'Computer (Hard)') :- !.
+
+player_type(player_a, A/_, Type) :- player(A, Type), !.
+player_type(player_b, _/B, Type) :- player(B, Type), !.
+
+turn_to_text(player_a, 'Player A') :- !.
+turn_to_text(player_b, 'Player B') :- !.
+
+draw_turn(Turn, Players):-
+    turn_to_text(Turn, TurnText),
+    player_type(Turn, Players, Type),
+    format('~w\'s turn - ~w\n\n', [TurnText, Type]).
+
+display_game(Turn-Board-Players) :-
+    clear_screen,
+    draw_board(Board),
+    draw_turn(Turn, Players),
     nl.
+
+display_settings(Width/Height-A/B) :-
+    write('Current settings:\n\n'),
+    format('Board size: ~d by ~d\n', [Width, Height]),
+    player(A, PlayerA),
+    player(B, PlayerB),
+    format('Player A: ~w\n', [PlayerA]),
+    format('Player B: ~w\n\n', [PlayerB]).

@@ -1,5 +1,4 @@
-:- ensure_loaded('draw.pl').
-:- ensure_loaded('logic.pl').
+
 :- use_module(library(random)).
 :- use_module(library(lists)).
 
@@ -10,17 +9,17 @@ play_option(2, flip).
 play_option(3, rotate).
 
 select_stone_play(Move) :-
-    write('1 - Move\n'),
-    write('2 - Flip\n'),
+    write('1. Move\n'),
+    write('2. Flip\n'),
     write('Select a move for the stone\n'),
     read_input(Option, validate_option, [1-2]),
     play_option(Option, Move), 
     !.
 
 select_river_play(Move) :-
-    write('1 - Move\n'),
-    write('2 - Flip\n'),
-    write('3 - Rotate\n'),
+    write('1. Move\n'),
+    write('2. Flip\n'),
+    write('3. Rotate\n'),
     write('Select a move for the river\n'),
     read_input(Option, validate_option, [1-3]),
     play_option(Option, Move), 
@@ -85,53 +84,55 @@ move(X-Y-River/X1-Y1-Piece/pushMove) :-
     nth1(Input, Moves, Move),
     move(Move).
 
-execute_play(move, X, Y, _Piece) :-
-    generate_moves(X, Y, Moves),
-    print_moves(Moves, 1),
-    read(Input),
-    length(Moves, Length),
-    validate_option(Input, 1-Length),
-    nth1(Input, Moves, Move),
-    move(Move).
+execute_play(Board, move, X, Y, NewBoard) :-
+    write('Currently Not Moving\n'),
+    read(_).
+    % generate_moves(X, Y, Moves),
+    % print_moves(Moves, 1),
+    % read(Input),
+    % length(Moves, Length),
+    % validate_option(Input, 1-Length),
+    % nth1(Input, Moves, Move),
+    % move(Move).
 
-execute_play(flip, X, Y, Piece) :-
+execute_play(Board, flip, X, Y, NewBoard) :-
+    piece_in(Board, Piece, X-Y),
     (Piece = squareStn; Piece = circleStn),
-    write('1 - Horizontal\n'),
-    write('2 - Vertical\n'),
+    !,
+    write('1. Horizontal\n'),
+    write('2. Vertical\n'),
     write('Provide the direction of the flip\n'),
-    read(Option, 1-2),
+    read_input(Option, validate_option, [1-2]),
     get_direction(Option, Direction),
     flip(Piece, Direction, Flipped),
-    replace_piece(X, Y, Flipped), !.
+    replace_piece(Board, X, Y, Flipped, NewBoard).
 
-execute_play(flip, X, Y, Piece) :-
+execute_play(Board, flip, X, Y, NewBoard) :-
     !,
+    piece_in(Board, Piece, X-Y),
     flip(Piece, Flipped),
-    replace_piece(X, Y, Flipped).
+    replace_piece(Board, X, Y, Flipped, NewBoard).
 
-execute_play(rotate, X, Y, Piece) :-
+execute_play(Board, rotate, X, Y, NewBoard) :-
     !,
+    piece_in(Board, Piece, X-Y),
     rotate(Piece, Rotated),
-    replace_piece(X, Y, Rotated).
+    replace_piece(Board, X, Y, Rotated, NewBoard).
 
-play_turn(Turn-Board-Players, NewTurn-Board-Players) :-
-    turn(Turn, _, TurnText),
-    write(TurnText),
+get_move(Board, Turn, Move-X/Y) :-
     get_piece(Board, Turn, X, Y, Piece),
-    format('Select a play for the ~w at ~d,~d\n', [Piece, X, Y]),
-    % select_play(Piece, Move),
-    % execute_play(Move, X, Y, Piece).
-    read(_),
+    select_play(Piece, Move).
+
+move(Turn-Board-Players, Move-X/Y, NewTurn-NewBoard-Players) :-
+    execute_play(Board, Move, X, Y, NewBoard),
     switch_turn(Turn, NewTurn).
 
+play_turn(Turn-Board-Players, NewGameState) :-
+    get_move(Board, Turn, Move),
+    move(Turn-Board-Players, Move, NewGameState).
+
 game_loop(GameState) :-
-    GameState = _-Board-_,
-    draw(Board),
+    display_game(GameState),
     play_turn(GameState, NewGameState),
     game_loop(NewGameState).
-
-
-     
-    
-
     

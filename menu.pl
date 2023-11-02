@@ -1,9 +1,11 @@
 :- ensure_loaded('create.pl').
 :- ensure_loaded('game.pl').
 
-validate_option([Option, L-U]) :- between(L, U, Option).
+validate_option([Option, L-U]) :- 
+    between(L, U, Option).
 
-validade_size([Width-Height]) :-
+validate_size([Width-Height]) :-
+    number(Width), number(Height),
     Width >= 5, Height >= 10,
     Width mod 2 =:= 1,
     Height mod 2 =:= 0.
@@ -26,14 +28,9 @@ read_input(Input, Validator, Arguments, OptionType) :-
     read(Input),
     call(Validator, [Input | Arguments]).
 
-
 start(Size-Players) :- 
     initial_state(Size, Players, GameState),
     game_loop(GameState).
-
-player(hum, 'Human') :- !.
-player(pc1, 'Computer (Easy)') :- !.
-player(pc2, 'Computer (Hard)') :- !.
 
 change_players(Size-_, Size-A/B) :-
     write('Provide the new players in the following format A-B, where A is player A and B is player B\n\n'),
@@ -48,19 +45,11 @@ change_board_size(_-Players, Width/Height-Players) :-
     write('| width is odd && width >= 5.\n'),
     write('| height is even && height >= 10.\n\n'),
     write('Example: 13-14\n\n'),
-    read_input(Width-Height, validade_size, [], 'width and height').
+    read_input(Width-Height, validate_size, [], 'width and height').
 
 menu_option(1, Settings, Settings) :- !, start(Settings).
 menu_option(2, Settings, NewSettings) :- !, change_players(Settings, NewSettings).
 menu_option(3, Settings, NewSettings) :- !, change_board_size(Settings, NewSettings).
-
-display_settings(Width/Height-A/B) :-
-    write('Current settings:\n\n'),
-    format('Board size: ~d by ~d\n', [Width, Height]),
-    player(A, PlayerA),
-    player(B, PlayerB),
-    format('Player A: ~w\n', [PlayerA]),
-    format('Player B: ~w\n\n', [PlayerB]).
 
 menu_loop(Settings) :-
     clear_screen,
