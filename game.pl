@@ -1,31 +1,25 @@
 :- ensure_loaded('draw.pl').
-:- ensure_loaded('moves.pl').
+:- ensure_loaded('logic.pl').
 :- use_module(library(random)).
 :- use_module(library(lists)).
 
 % # Play
 
-turn(player_a, 0, 'Player A turn.\n').
+turn(player_b, 0, 'Player A turn.\n').
 turn(player_b, 1, 'Player B turn.\n').
 
 decide_first_turn(T) :-
     random(0, 2, R),
     turn(T, R, _).
 
-swicth_turn(player_a, player_b).
-swicth_turn(player_b, player_a).
+switch_turn(player_a, player_b).
+switch_turn(player_b, player_a).
 
-replace_piece(X, Y, NewPiece, Board) :-
+replace_piece(Board, X, Y, NewPiece, NewBoard) :-
     nth0(Y, Board, Row, RestBoard),
     nth0(X, Row, _, RestRow), 
     nth0(X, NewRow, NewPiece, RestRow),
-    nth0(Y, NewBoard, NewRow, RestBoard),
-    retract((board(Board) :- !)),
-    asserta((board(NewBoard) :- !)).
-
-replace_piece(X, Y, NewPiece) :-
-    board(Board),
-    replace_piece(X, Y, NewPiece, Board).
+    nth0(Y, NewBoard, NewRow, RestBoard).
 
 outcome_text(normalMove, '').
 outcome_text(riverMove, ' (River Movement)').
@@ -109,82 +103,18 @@ execute_play(rotate, X, Y, Piece) :-
     rotate(Piece, Rotated),
     replace_piece(X, Y, Rotated).
 
-play_turn(Turn, NewTurn) :-
+play_turn(Turn, Turn) :-
     turn(Turn, _, TurnText),
     write(TurnText),
     get_piece(Turn, Piece, X, Y),
     select_play(Piece, Move),
-    execute_play(Move, X, Y, Piece),
-    swicth_turn(Turn, NewTurn).
+    execute_play(Move, X, Y, Piece).
+    % switch_turn(Turn, NewTurn).
 
-game_loop(Turn) :-
-    %repeat,
-    board(B),
-    draw(B),
-    play_turn(Turn, NewTurn),
-    game_loop(NewTurn).
-
-start :- 
-    decide_first_turn(T),
-    game_loop(T).
-
-change_players :-
-    write('Provide the new players in the following format A-B, where A is player A and B is player B\n'),
-    write('example: H-PC2\n\n'),
-    write('H - Human\n'),
-    write('PC1 - Computer (Easy)\n'),
-    write('PC2 - Computer (Hard)\n'),
-    read(A-B),
-    format('The players were successfully changed to ~w and ~w\n', [A,B]),
-    loop.   
-
-change_board_size :-
-    write('Provide the new board width and height in the following format W-H (eg.: 13-14)\n'),
-    read(W-H),
-    format('The board was successfully changed to ~d by ~d\n', [W,H]),
-    loop.
-
-menu_option(1) :- change_players, !.
-menu_option(2) :- change_board_size, !.
-menu_option(3) :- start, !.
-
-loop :-
-    write('1. Change players\n'),
-    write('2. Change board size\n'),
-    write('3. Start game\n'),
-    read(Input),
-    validate_option(Input, 1-3),
-    menu_option(Input), 
-    loop.
-
-% paint the following art with write() predicates in the play :- predicate
-%   ______     __                                                                            
-%  /      \   /  |                                                                           
-% /$$$$$$  | _$$ |_     ______   _______    ______    _______                                
-% $$ \__$$/ / $$   |   /      \ /       \  /      \  /       |                               
-% $$      \ $$$$$$/   /$$$$$$  |$$$$$$$  |/$$$$$$  |/$$$$$$$/                                
-%  $$$$$$  |  $$ | __ $$ |  $$ |$$ |  $$ |$$    $$ |$$      \                                
-% /  \__$$ |  $$ |/  |$$ \__$$ |$$ |  $$ |$$$$$$$$/  $$$$$$  |                               
-% $$    $$/   $$  $$/ $$    $$/ $$ |  $$ |$$       |/     $$/                                
-%  $$$$$$/     $$$$/   $$$$$$/  $$/   $$/  $$$$$$$/ $$$$$$$/                                 
-                                                                                           
-                                                                                           
-                                                                                           
-%                            __        _______   __                                          
-%                           /  |      /       \ /  |                                         
-%   ______   _______    ____$$ |      $$$$$$$  |$$/  __     __   ______    ______    _______ 
-%  /      \ /       \  /    $$ |      $$ |__$$ |/  |/  \   /  | /      \  /      \  /       |
-%  $$$$$$  |$$$$$$$  |/$$$$$$$ |      $$    $$< $$ |$$  \ /$$/ /$$$$$$  |/$$$$$$  |/$$$$$$$/ 
-%  /    $$ |$$ |  $$ |$$ |  $$ |      $$$$$$$  |$$ | $$  /$$/  $$    $$ |$$ |  $$/ $$      \ 
-% /$$$$$$$ |$$ |  $$ |$$ \__$$ |      $$ |  $$ |$$ |  $$ $$/   $$$$$$$$/ $$ |       $$$$$$  |
-% $$    $$ |$$ |  $$ |$$    $$ |      $$ |  $$ |$$ |   $$$/    $$       |$$ |      /     $$/ 
-%  $$$$$$$/ $$/   $$/  $$$$$$$/       $$/   $$/ $$/     $/      $$$$$$$/ $$/       $$$$$$$/  
-                                                                                                                                                                                
-play :-
-    clear_screen,
-    draw_title,
-    loop.
-    
+game_loop(Turn-Board-Players) :-
+    draw(Board),
+    %play_turn(Turn, NewTurn),
+    game_loop(Turn-Board-Players).
 
 
      

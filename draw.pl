@@ -1,5 +1,5 @@
-:- ensure_loaded('piece_sprites.pl').
-:- ensure_loaded('data.pl').
+:- ensure_loaded('sprites.pl').
+:- ensure_loaded('rules.pl').
 
 % # Draw
 
