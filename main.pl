@@ -1,14 +1,20 @@
 :- ensure_loaded('create.pl').
-:- ensure_loaded('draw.pl').
-:- ensure_loaded('game.pl').
+:- ensure_loaded('display.pl').
+:- ensure_loaded('gameover.pl').
+:- ensure_loaded('match.pl').
 :- ensure_loaded('logic.pl').
 :- ensure_loaded('menu.pl').
 :- ensure_loaded('rules.pl').
+:- ensure_loaded('settings.pl').
 :- ensure_loaded('sprites.pl').
+:- ensure_loaded('state.pl').
+:- ensure_loaded('utils.pl').
 
+play :- game_loop(menu). 
 
-default_settings(13/14-hum/hum).
+game_loop(end) :- !.
 
-play :-
-    default_settings(DefautSettings),
-    menu_loop(DefautSettings). 
+game_loop(GameState) :-
+    display_game(GameState),
+    proceed(GameState, NewGameState),
+    game_loop(NewGameState).

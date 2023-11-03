@@ -9,18 +9,22 @@ play_option(2, flip).
 play_option(3, rotate).
 
 select_stone_play(Move) :-
-    write('1. Move\n'),
-    write('2. Flip\n'),
+    nl,
     write('Select a move for the stone\n'),
+    write('You may type 0 to cancel a move at any time.\n\n'),
+    write('1. Move\n'),
+    write('2. Flip\n\n'),
     read_input(Option, validate_option, [1-2]),
     play_option(Option, Move), 
     !.
 
 select_river_play(Move) :-
+    nl,
+    write('Select a move for the river\n'),
+    write('You may type 0 to cancel a move at any time.\n\n'),
     write('1. Move\n'),
     write('2. Flip\n'),
-    write('3. Rotate\n'),
-    write('Select a move for the river\n'),
+    write('3. Rotate\n\n'),
     read_input(Option, validate_option, [1-3]),
     play_option(Option, Move), 
     !.
@@ -35,12 +39,6 @@ select_play(circleHrz, Move) :- !, select_river_play(Move).
 
 switch_turn(player_a, player_b).
 switch_turn(player_b, player_a).
-
-replace_piece(Board, X/Y, NewPiece, NewBoard) :-
-    nth0(Y, Board, Row, RestBoard),
-    nth0(X, Row, _, RestRow), 
-    nth0(X, NewRow, NewPiece, RestRow),
-    nth0(Y, NewBoard, NewRow, RestBoard).
 
 outcome_text(normalMove, '').
 outcome_text(riverMove, ' (River Movement)').
@@ -81,16 +79,16 @@ execute_followup(Board, Piece, _-_-_-Moves, NewBoard) :-
 execute_move(Board, Pos1-Pos2-normalMove, NewBoard) :-
     !,
     piece_in(Board, Piece, Pos1),
-    replace_piece(Board, Pos1, emptySlot, Board1),
+    remove_piece(Board, Pos1, Board1),
     replace_piece(Board1, Pos2, Piece, NewBoard).
 
 execute_move(Board, Move, NewBoard) :-
     Move = Pos1-_-riverMove,
     !,
     piece_in(Board, Piece, Pos1),
-    replace_piece(Board, Pos1, emptySlot, Board1),
+    remove_piece(Board, Pos1, Board1),
     expand_move(Board1, Move, Piece, _, Expanded),
-    write('\nRiver Movement! \n'),
+    write('\nRiver Movement!\n'),
     execute_followup(Board1, Piece, Expanded, NewBoard).
 
 execute_move(Board, Move, NewBoard) :-
@@ -107,7 +105,7 @@ execute_move(Board, Move, NewBoard) :-
 
 execute_play(Board, move, Pos, NewBoard) :-
     generate_moves(Board, Pos, Moves),
-    write('\nAvailable Moves for :\n'),
+    write('\nChoose one of the available moves for the selected piece.\n\n'),
     print_moves(Moves),
     length(Moves, Length),
     read_input(Input, validate_option, [1-Length]),
@@ -118,9 +116,9 @@ execute_play(Board, flip, Pos, NewBoard) :-
     piece_in(Board, Piece, Pos),
     (Piece = squareStn; Piece = circleStn),
     !,
+    write('Provide the direction of the flip\n\n'),
     write('1. Horizontal\n'),
     write('2. Vertical\n'),
-    write('Provide the direction of the flip\n'),
     read_input(Option, validate_option, [1-2]),
     get_direction(Option, Direction),
     flip(Piece, Direction, Flipped),
@@ -142,16 +140,13 @@ get_move(Board, Turn, Move-Pos) :-
     get_piece(Board, Turn, Piece, Pos),
     select_play(Piece, Move).
 
-move(Turn-Board-Players, Move-Pos, NewTurn-NewBoard-Players) :-
+move(match-(Turn-Board), Move-Pos, match-(NewTurn-NewBoard)) :-
     execute_play(Board, Move, Pos, NewBoard),
     switch_turn(Turn, NewTurn).
 
-play_turn(Turn-Board-Players, NewGameState) :-
-    get_move(Board, Turn, Move),
-    move(Turn-Board-Players, Move, NewGameState).
-
-game_loop(GameState) :-
-    display_game(GameState),
-    play_turn(GameState, NewGameState),
-    game_loop(NewGameState).
+handle_turn(match-(Turn-Board), match-(NewTurn-NewBoard)) :-
+    get_move(Board, Turn, Move-Pos),
+    move(match-(Turn-Board), Move-Pos, match-(NewTurn-NewBoard)),
+    !.
     
+handle_turn(GameState, GameState).

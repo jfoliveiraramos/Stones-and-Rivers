@@ -4,6 +4,11 @@ piece_in(Board, Piece, X/Y) :-
     nth0(Y, Board, Row),
     nth0(X, Row, Piece).
 
+slot_in(Slot, X/Y) :-
+    get_empty_board(EmptyBoard),
+    nth0(Y, EmptyBoard, Row),
+    nth0(X, Row, Slot).
+
 validate_piece([X-Y, Board, Turn]) :-
     piece_in(Board, Piece, X/Y),
     belongs_to(Piece, Turn).
@@ -13,6 +18,19 @@ get_piece(Board, Turn, Piece, X/Y) :-
     read_input(X-Y, validate_piece, [Board, Turn], 'piece'),
     piece_in(Board, Piece, X/Y),
     !.
+
+replace_piece(Board, X/Y, NewPiece, NewBoard) :-
+    nth0(Y, Board, Row, RestBoard),
+    nth0(X, Row, _, RestRow), 
+    nth0(X, NewRow, NewPiece, RestRow),
+    nth0(Y, NewBoard, NewRow, RestBoard).
+
+remove_piece(Board, X/Y, NewBoard) :-
+    get_empty_board(EmptyBoard),
+    nth0(Y, EmptyBoard, EmptyRow),
+    nth0(X, EmptyRow, EmptyPlace), 
+    replace_piece(Board, X/Y, EmptyPlace, NewBoard).
+
 
 % -----------------------------------------------------
 
@@ -36,51 +54,55 @@ left(X/Y, X1/Y) :- X1 is X - 1.
 up(X/Y, X/Y1) :- Y1 is Y - 1.
 down(X/Y, X/Y1) :- Y1 is Y + 1.
 
-free_adjacent(Board, horizontal, Piece, Pos):-
-    right(Pos, Right),
-    can_move(Board, Piece, Right, Outcome), 
-    Outcome \= pushMove,
-    !.
-free_adjacent(Board, horizontal, Piece, Pos):-
-    left(Pos, Left),
-    can_move(Board, Piece, Left, Outcome), 
-    Outcome \= pushMove,
-    !.
+% free_adjacent(Board, horizontal, Piece, Pos):-
+%     right(Pos, Right),
+%     can_move(Board, Piece, Right, Outcome), 
+%     Outcome \= pushMove,
+%     !.
+% free_adjacent(Board, horizontal, Piece, Pos):-
+%     left(Pos, Left),
+%     can_move(Board, Piece, Left, Outcome), 
+%     Outcome \= pushMove,
+%     !.
     
-free_adjacent(Board, vertical, Piece, Pos):-
-    up(Pos, Up),
-    can_move(Board, Piece, Up, Outcome), 
-    Outcome \= pushMove,
-    !.
-free_adjacent(Board, vertical, Piece, Pos):-
-    down(Pos, Down),
-    can_move(Board, Piece, Down, Outcome), 
-    Outcome \= pushMove,
-    !.
+% free_adjacent(Board, vertical, Piece, Pos):-
+%     up(Pos, Up),
+%     can_move(Board, Piece, Up, Outcome), 
+%     Outcome \= pushMove,
+%     !.
+% free_adjacent(Board, vertical, Piece, Pos):-
+%     down(Pos, Down),
+%     can_move(Board, Piece, Down, Outcome), 
+%     Outcome \= pushMove,
+%     !.
+
+can_move_over(Piece, Pos) :-
+    slot_in(Slot, Pos),
+    can_move_over_slot(Piece, Slot).
 
 can_move(Board, Piece, Pos, normalMove) :- piece(Piece), piece_in(Board, emptySlot, Pos), !.
 can_move(Board, Piece, Pos, normalMove) :- circle(Piece), piece_in(Board, circleScr, Pos), !.
 can_move(Board, Piece, Pos, normalMove) :- square(Piece), piece_in(Board, squareScr, Pos), !.
 can_move(Board, Piece, Pos, riverMove) :- 
     piece(Piece), 
+    can_move_over(Piece, Pos),
     piece_in(Board, River, Pos),
-    horizontal(River), 
-    free_adjacent(Board, horizontal, Piece, Pos).
+    horizontal(River).
 can_move(Board, Piece, Pos, riverMove) :-
     piece(Piece),
+    can_move_over(Piece, Pos),
     piece_in(Board, River, Pos),
-    vertical(River),
-    free_adjacent(Board, vertical, Piece, Pos).
+    vertical(River).
 can_move(Board, River, Pos, pushMove) :-
     horizontal(River),
+    can_move_over(River, Pos),
     piece_in(Board, Piece, Pos),
-    piece(Piece),
-    free_adjacent(Board, horizontal, Piece, Pos).
+    piece(Piece).
 can_move(Board, River, Pos, pushMove) :-
     vertical(River),
+    can_move_over(River, Pos),
     piece_in(Board, Piece, Pos),
-    piece(Piece),
-    free_adjacent(Board, vertical, Piece, Pos).
+    piece(Piece).
 
 generate_orthogonal(X/Y, X1/Y1) :-  X1 is X, Y1 is Y + 1.
 generate_orthogonal(X/Y, X1/Y1) :-  X1 is X, Y1 is Y - 1.
@@ -149,13 +171,13 @@ setup_expand(FinalBoard, _-normalMove, _, _, FinalBoard) :- !.
 
 setup_expand(Board, Pos1-_-riverMove, Piece, _, FinalBoard) :-
     piece_in(Board, Piece, Pos1),
-    replace_piece(Board, Pos1, emptySlot, FinalBoard),
+    remove_piece(Board, Pos1, FinalBoard),
     !.
 
 setup_expand(Board, Pos1-Pos2-pushMove, Piece, PushingRiver, FinalBoard) :-
     piece_in(Board, PushingRiver, Pos1),
     piece_in(Board, Piece, Pos2),
-    replace_piece(Board, Pos1, emptySlot, TempBoard),
+    remove_piece(Board, Pos1, TempBoard),
     replace_piece(TempBoard, Pos2, PushingRiver, FinalBoard).
 
 % expand_moves(_, [], _, []) :- !.

@@ -28,7 +28,7 @@ draw_title :-
     write(' /$$$$$$$ |$$ |  $$ |$$ \\__$$ |      $$ |  $$ |$$ |  $$ $$/   $$$$$$$$/ $$ |       $$$$$$  |\n'),
     write(' $$    $$ |$$ |  $$ |$$    $$ |      $$ |  $$ |$$ |   $$$/    $$       |$$ |      /     $$/ \n'),
     write('  $$$$$$$/ $$/   $$/  $$$$$$$/       $$/   $$/ $$/     $/      $$$$$$$/ $$/       $$$$$$$/  \n'),
-    nl,nl.
+    nl, nl.
 
 % ## Draw Axis
 
@@ -127,16 +127,27 @@ draw_turn(Turn, Players):-
     player_type(Turn, Players, Type),
     format('~w\'s turn - ~w\n\n', [TurnText, Type]).
 
-display_game(Turn-Board-Players) :-
-    clear_screen,
-    draw_board(Board),
-    draw_turn(Turn, Players),
-    nl.
-
 display_settings(Width/Height-A/B) :-
-    write('Current settings:\n\n'),
+    write('Current settings\n\n'),
     format('Board size: ~d by ~d\n', [Width, Height]),
     player(A, PlayerA),
     player(B, PlayerB),
     format('Player A: ~w\n', [PlayerA]),
-    format('Player B: ~w\n\n', [PlayerB]).
+    format('Player B: ~w\n\n\n', [PlayerB]).
+
+display_menu_options :-
+    write('Choose an option:\n\n'),
+    write('1. Start game\n'),
+    write('2. Change players\n'),
+    write('3. Change board size\n'),
+    write('0. Quit\n'),
+    nl.
+
+draw_winner(Winner) :-
+    turn_to_text(Winner, WinnerText),
+    format('Congratulations! ~w won the game!\n\n', [WinnerText]).
+
+display_gameOver_options :-
+    write('Choose an option:\n\n'),
+    write('1. Play again\n'),
+    write('2. Quit to main menu\n\n').
