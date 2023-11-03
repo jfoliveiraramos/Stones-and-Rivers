@@ -36,7 +36,7 @@ select_play(circleHrz, Move) :- !, select_river_play(Move).
 switch_turn(player_a, player_b).
 switch_turn(player_b, player_a).
 
-replace_piece(Board, X, Y, NewPiece, NewBoard) :-
+replace_piece(Board, X/Y, NewPiece, NewBoard) :-
     nth0(Y, Board, Row, RestBoard),
     nth0(X, Row, _, RestRow), 
     nth0(X, NewRow, NewPiece, RestRow),
@@ -46,57 +46,76 @@ outcome_text(normalMove, '').
 outcome_text(riverMove, ' (River Movement)').
 outcome_text(pushMove, ' (River Push)').
 
-print_moves([], _) :- !.
-print_moves([_-_-_/X1-Y1-_/Outcome | Moves], N) :-
+print_move(_/_-X/Y-normalMove, N) :-
+    outcome_text(normalMove, OutcomeText),
+    format('~d. ~d,~d~s\n', [N, X, Y, OutcomeText]),
+    !.
+print_move(_/_-X/Y-Outcome, N) :-
     outcome_text(Outcome, OutcomeText),
-    format('~d. ~d,~d~s\n', [N, X1, Y1, OutcomeText]),
+    format('~d. ~d,~d~s\n', [N, X, Y, OutcomeText]).
+
+print_moves(Moves) :- 
+    print_moves(Moves, 1), 
+    nl.
+print_moves([], _) :- !.
+print_moves([Move | Moves], N) :-
+    print_move(Move, N),
     N1 is N + 1,
     print_moves(Moves, N1).
 
 get_direction(1, horizontal) :- !.
 get_direction(2, vertical) :- !.   
 
-move(X-Y-Piece/X1-Y1-_/normalMove) :-
+execute_followup(Board, Piece, _-Pos2-normalMove, NewBoard) :-
     !,
-    replace_piece(X, Y, emptySlot),
-    replace_piece(X1, Y1, Piece).
+    replace_piece(Board, Pos2, Piece, NewBoard).
 
-move(X-Y-Piece/X1-Y1-River/riverMove) :-
-    write('River Movement!\n'),
-    expand_move(X-Y-Piece/X1-Y1-River/riverMove, Moves),
+execute_followup(Board, Piece, _-_-_-Moves, NewBoard) :-
+    print_moves(Moves),
     length(Moves, Length),
-    print_moves(Moves, 1),
-    read(Input),
-    validate_option(Input, 1-Length),
+    read_input(Input, validate_option, [1-Length]),
     nth1(Input, Moves, Move),
-    move(Move).
+    expand_move(Board, Move, Piece, _, Expanded),
+    execute_followup(Board, Piece, Expanded, NewBoard).
 
-move(X-Y-River/X1-Y1-Piece/pushMove) :-
-    write('River Push!\n'),
-    piece_in(Piece, X1-Y1),
-    replace_piece(X, Y, emptySlot),
-    replace_piece(X1, Y1, River),
-    expand_move(X-Y-River/X1-Y1-Piece/pushMove, Moves),
+execute_move(Board, Pos1-Pos2-normalMove, NewBoard) :-
+    !,
+    piece_in(Board, Piece, Pos1),
+    replace_piece(Board, Pos1, emptySlot, Board1),
+    replace_piece(Board1, Pos2, Piece, NewBoard).
+
+execute_move(Board, Move, NewBoard) :-
+    Move = Pos1-_-riverMove,
+    !,
+    piece_in(Board, Piece, Pos1),
+    replace_piece(Board, Pos1, emptySlot, Board1),
+    expand_move(Board1, Move, Piece, _, Expanded),
+    write('\nRiver Movement! \n'),
+    execute_followup(Board1, Piece, Expanded, NewBoard).
+
+execute_move(Board, Move, NewBoard) :-
+    Move = Pos1-Pos2-pushMove,
+    !,
+    piece_in(Board, River, Pos1),
+    piece_in(Board, Piece, Pos2),
+    replace_piece(Board, Pos1, emptySlot, Board1),
+    replace_piece(Board1, Pos2, River, Board2),
+    execute_play(Board2, flip, Pos2, Board3),
+    expand_move(Board3, Move, Piece, River, Expanded),
+    write('\nRiver Push! \n'),
+    execute_followup(Board3, Piece, Expanded, NewBoard).
+
+execute_play(Board, move, Pos, NewBoard) :-
+    generate_moves(Board, Pos, Moves),
+    write('\nAvailable Moves for :\n'),
+    print_moves(Moves),
     length(Moves, Length),
-    print_moves(Moves, 1),
-    read(Input),
-    validate_option(Input, 1-Length),
+    read_input(Input, validate_option, [1-Length]),
     nth1(Input, Moves, Move),
-    move(Move).
+    execute_move(Board, Move, NewBoard).
 
-execute_play(Board, move, X, Y, NewBoard) :-
-    write('Currently Not Moving\n'),
-    read(_).
-    % generate_moves(X, Y, Moves),
-    % print_moves(Moves, 1),
-    % read(Input),
-    % length(Moves, Length),
-    % validate_option(Input, 1-Length),
-    % nth1(Input, Moves, Move),
-    % move(Move).
-
-execute_play(Board, flip, X, Y, NewBoard) :-
-    piece_in(Board, Piece, X-Y),
+execute_play(Board, flip, Pos, NewBoard) :-
+    piece_in(Board, Piece, Pos),
     (Piece = squareStn; Piece = circleStn),
     !,
     write('1. Horizontal\n'),
@@ -105,26 +124,26 @@ execute_play(Board, flip, X, Y, NewBoard) :-
     read_input(Option, validate_option, [1-2]),
     get_direction(Option, Direction),
     flip(Piece, Direction, Flipped),
-    replace_piece(Board, X, Y, Flipped, NewBoard).
+    replace_piece(Board, Pos, Flipped, NewBoard).
 
-execute_play(Board, flip, X, Y, NewBoard) :-
+execute_play(Board, flip, Pos, NewBoard) :-
     !,
-    piece_in(Board, Piece, X-Y),
+    piece_in(Board, Piece, Pos),
     flip(Piece, Flipped),
-    replace_piece(Board, X, Y, Flipped, NewBoard).
+    replace_piece(Board, Pos, Flipped, NewBoard).
 
-execute_play(Board, rotate, X, Y, NewBoard) :-
+execute_play(Board, rotate, Pos, NewBoard) :-
     !,
-    piece_in(Board, Piece, X-Y),
+    piece_in(Board, Piece, Pos),
     rotate(Piece, Rotated),
-    replace_piece(Board, X, Y, Rotated, NewBoard).
+    replace_piece(Board, Pos, Rotated, NewBoard).
 
-get_move(Board, Turn, Move-X/Y) :-
-    get_piece(Board, Turn, X, Y, Piece),
+get_move(Board, Turn, Move-Pos) :-
+    get_piece(Board, Turn, Piece, Pos),
     select_play(Piece, Move).
 
-move(Turn-Board-Players, Move-X/Y, NewTurn-NewBoard-Players) :-
-    execute_play(Board, Move, X, Y, NewBoard),
+move(Turn-Board-Players, Move-Pos, NewTurn-NewBoard-Players) :-
+    execute_play(Board, Move, Pos, NewBoard),
     switch_turn(Turn, NewTurn).
 
 play_turn(Turn-Board-Players, NewGameState) :-

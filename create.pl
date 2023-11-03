@@ -38,6 +38,14 @@ povoate(Board, Width, Height, PlayerPieces, circleStn, FinalBoard) :-
     put_pieces(Board4, squareStn, X, SquareY2, N, Board5),
     put_pieces(Board5, circleScr, ScoreX, CircleScoreY, ScoreN, FinalBoard).
 
+% For Test Purposes
+create_board(_, _,[
+    [circleHrz, emptySlot, emptySlot, circleVrt],
+    [emptySlot, emptySlot, emptySlot, emptySlot],
+    [emptySlot, emptySlot, emptySlot, emptySlot],
+    [circleStn, circleVrt, emptySlot, circleHrz]
+]) :- !.
+
 create_board(Width, Height, Board) :-
     create_empty_board(Width, Height, EmptyBoard),
     PlayerPieces is (Width // 2 + 1) * 2,

@@ -21,6 +21,7 @@ square(squareHrz) :- !.
 
 piece(Piece) :- stone(Piece) ; river(Piece).
 
+belongs_to(_, _) :- !.
 belongs_to(Piece, player_a) :- square(Piece), !.
 belongs_to(Piece, player_b) :- circle(Piece), !.
 
