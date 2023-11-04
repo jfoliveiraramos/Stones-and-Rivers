@@ -76,59 +76,41 @@ print_moves([Move | Moves], N) :-
 get_direction(1, horizontal) :- !.
 get_direction(2, vertical) :- !.   
 
-execute_followup(Board, Piece, _-Pos2-normalMove, NewBoard) :-
+query_move(Board, Player, Pos-Move) :-
+    query_piece(Board, Player, Piece, Pos),
+    select_play(Piece, Move),
+    !.
+
+execute_followup(Board, Piece, RiverPos-pushMove, FinalPos-normalMove, NewBoard) :-
     !,
-    replace_piece(Board, Pos2, Piece, NewBoard).
+    piece_in(Board, River, RiverPos),
+    flip(River, FlippedRiver),
+    replace_piece(Board, RiverPos, FlippedRiver, TempBoard),
+    replace_piece(TempBoard, FinalPos, Piece, NewBoard).
 
-execute_followup(Board, Piece, _-_-_-Moves, NewBoard) :-
-    print_moves(Moves),
-    length(Moves, Length),
-    read_input(Input, validate_option, [1-Length]),
-    nth1(Input, Moves, Move),
-    expand_move(Board, Move, Piece, _, Expanded),
-    execute_followup(Board, Piece, Expanded, NewBoard).
-
-execute_move(Board, Pos1, Pos2-normalMove, NewBoard) :-
+execute_followup(Board, Piece, _, FinalPos-normalMove, NewBoard) :-
     !,
-    piece_in(Board, Piece, Pos1),
-    remove_piece(Board, Pos1, Board1),
-    replace_piece(Board1, Pos2, Piece, NewBoard).
+    replace_piece(Board, FinalPos, Piece, NewBoard).
 
-execute_move(Board, Move, NewBoard) :-
-    Move = Pos1-_-riverMove,
+execute_followup(Board, Piece, FirstMove, Move, NewBoard) :-
     !,
-    piece_in(Board, Piece, Pos1),
-    remove_piece(Board, Pos1, Board1),
-    expand_move(Board1, Move, Piece, _, Expanded),
-    write('\nRiver Movement!\n'),
-    execute_followup(Board1, Piece, Expanded, NewBoard).
-
-execute_move(Board, Move, NewBoard) :-
-    Move = Pos1-Pos2-pushMove,
-    !,
-    piece_in(Board, River, Pos1),
-    piece_in(Board, Piece, Pos2),
-    replace_piece(Board, Pos1, emptySlot, Board1),
-    replace_piece(Board1, Pos2, River, Board2),
-    execute_play(Board2, flip, Pos2, Board3),
-    expand_move(Board3, Move, Piece, River, Expanded),
-    write('\nRiver Push! \n'),
-    execute_followup(Board3, Piece, Expanded, NewBoard).
-
-execute_play(Board, move, Pos, NewBoard) :-
-    initial_moves(Board, Pos, Moves),
+    findall(NewMove, develop(Board, Piece, Move, NewMove), Moves),
     write('\nChoose one of the available moves for the selected piece.\n\n'),
     print_moves(Moves),
     length(Moves, Length),
     read_input(Input, validate_option, [1-Length]),
-    nth1(Input, Moves, Move),
-    execute_move(Board, Pos, Move, NewBoard).
+    nth1(Input, Moves, NewMove),
+    execute_followup(Board, Piece, FirstMove, NewMove, NewBoard).
 
-% write_moves([], _).
-% write_moves([Move | Moves], N) :-
-%     N1 is N + 1,
-%     format('~d. ~w\n', [N, Move]),
-%     write_moves(Moves, N1).
+execute_move(Board, Pos, Pos2-pushMove, NewBoard) :-
+    !,
+    setup_develop(Board, Pos, Pos2-pushMove, Piece, TempBoard),
+    execute_followup(TempBoard, Piece, Pos2-pushMove, Pos2-pushMove, NewBoard).  
+
+execute_move(Board, Pos, Move, NewBoard) :-
+    !,
+    setup_develop(Board, Pos, Move, Piece, TempBoard),
+    execute_followup(TempBoard, Piece, Move, Move, NewBoard).
 
 move(match-(Player-Board), Pos-rotate, match-(Player-NewBoard)) :-
     !,
@@ -150,7 +132,13 @@ move(match-(Player-Board), Pos-(flip-Direction), match-(Player-NewBoard)) :-
 
 move(match-(Player-Board), Pos-(move-player), match-(Player-NewBoard)) :-
     !,
-    execute_play(Board, move, Pos, NewBoard).
+    findall(Move, orthogonal_move(Board, Pos, Move), Moves),
+    write('\nChoose one of the available moves for the selected piece.\n\n'),
+    print_moves(Moves),
+    length(Moves, Length),
+    read_input(Input, validate_option, [1-Length]),
+    nth1(Input, Moves, Move),
+    execute_move(Board, Pos, Move, NewBoard).
 
 move(match-(Player-Board), Pos-move-[FinalPos-normalMove], match-(Player-NewBoard)) :- 
     !,
@@ -174,6 +162,12 @@ move(match-(Player-Board), Pos-move-[PushedPos-pushMove | Moves], match-(Player-
     remove_piece(Board, Pos, Board1),
     replace_piece(Board1, PushedPos, FlippedRiver, Board2),
     replace_piece(Board2, FinalPos, Piece, NewBoard).
+
+% write_moves([], _).
+% write_moves([Move | Moves], N) :-
+%     N1 is N + 1,
+%     format('~d. ~w\n', [N, Move]),
+%     write_moves(Moves, N1).
 
 handle_turn(GameState, NewGameState) :-
     GameState = match-(Player-_),

@@ -139,50 +139,9 @@ expand_move(Board, MainMove, Pushed, PushingRiver, MainMove-Moves) :-
     get_up_moves(Board, Pushed, Pos, Pos2, Moves1),
     get_down_moves(Board, Pushed, Pos, Pos2, Moves2),
     append(Moves1, Moves2, Moves).
-    
+
 initial_moves(Board, Pos, Moves) :-
      findall(Move, orthogonal_move(Board, Pos, Move), Moves).
-
-% setup_expand(FinalBoard, _-normalMove, _, _, FinalBoard) :- !.
-
-% setup_expand(Board, Pos1-_-riverMove, Piece, _, FinalBoard) :-
-%     piece_in(Board, Piece, Pos1),
-%     remove_piece(Board, Pos1, FinalBoard),
-%     !.
-
-% setup_expand(Board, Pos1-Pos2-pushMove, Piece, PushingRiver, FinalBoard) :-
-%     piece_in(Board, PushingRiver, Pos1),
-%     piece_in(Board, Piece, Pos2),
-%     remove_piece(Board, Pos1, TempBoard),
-%     replace_piece(TempBoard, Pos2, PushingRiver, FinalBoard).
-
-% limited_expand_move(Board, Move, Piece, PushingRiver, Move-FilteredMoves, VisitedRivers, UpdatedRivers):-
-%     expand_move(Board, Move, Piece, PushingRiver, Move-Moves),
-%     filter_visited_rivers(Moves, VisitedRivers, FilteredMoves, UpdatedRivers).
-
-% % expand_moves(_, [], _, []) :- !.
-% % expand_moves(Board, [Move | Moves], Piece, [ExpandedMove | ExpandedMoves]) :-
-% %     expand_move(Board, Move, Piece, ExpandedMove),
-% %     expand_moves(Board, Moves, Piece, ExpandedMoves).
-
-% full_expand_move(Board, Move, Piece, PushingRiver, Move-ExpandedMoves, VisitedRivers, UpdatedRivers2) :-
-%     limited_expand_move(Board, Move, Piece, PushingRiver, Move-Moves, VisitedRivers, UpdatedRivers1),
-%     full_expand_moves(Board, Moves, Piece, PushingRiver, ExpandedMoves, UpdatedRivers1, UpdatedRivers2).
-
-% full_expand_moves(_, [], _, []) :- !.
-% full_expand_moves(Board, [Move | Moves], Piece, PushingRiver, [ExpandedMove | ExpandedMoves], VisitedRivers, UpdatedRivers2) :-
-%     full_expand_move(Board, Move, Piece, PushingRiver, ExpandedMove, VisitedRivers, UpdatedRivers1),
-%     full_expand_moves(Board, Moves, Piece, PushingRiver, ExpandedMoves, UpdatedRivers1, UpdatedRivers2).
-
-% expand_first_moves(_, [], []) :- !.
-% expand_first_moves(Board, [Move | Moves], [ExpandedMove | ExpandedMoves], VisitedRivers) :-
-%     setup_expand(Board, Move, Piece, PushingRiver, TempBoard),
-%     full_expand_move(TempBoard, Move, Piece, PushingRiver, ExpandedMove, VisitedRivers, UpdatedRivers),
-%     expand_first_moves(Board, Moves, ExpandedMoves, UpdatedRivers).
-
-% all_moves(Board, Pos, Moves) :-
-%     findall(Move, orthogonal_move(Board, Pos, Move), InitialMoves),
-%     expand_first_moves(Board, InitialMoves, Moves, []).
 
 find_limit(Board, Piece, Direction, Pos, Limit) :- 
     call(Direction, Pos, NewPos),
@@ -239,7 +198,6 @@ develop(Board, Piece, Pos-_, NewMove) :-
     piece_in(Board, River, Pos),
     get_river_movement(Board, Piece, River, Pos, NewMove).
 
-
 river_verifier(RiverPos-riverMove, VisitedRivers, UpdatedRivers) :-
     \+ memberchk(RiverPos, VisitedRivers),
     !,
@@ -254,20 +212,21 @@ full_develop(Board, Piece, Move, VisitedRivers, [Move | Moves]) :-
     river_verifier(NewMove, VisitedRivers, UpdatedRivers),
     full_develop(Board, Piece, NewMove, UpdatedRivers, Moves).
 
-setup_develop(Board, _, _-normalMove, Board) :- !.
-setup_develop(Board, Pos, _-riverMove, TempBoard) :-
-    remove_piece(Board, Pos, TempBoard),
-    !.
-setup_develop(Board, Pos, NewPos-pushMove, TempBoard) :-
+
+setup_develop(Board, Pos, NewPos-pushMove, Piece, TempBoard) :-
+    piece_in(Board, Piece, NewPos),
     piece_in(Board, PushingRiver, Pos),
     remove_piece(Board, Pos, TempBoard1),
     replace_piece(TempBoard1, NewPos, PushingRiver, TempBoard),
     !.
+setup_develop(Board, Pos, _, Piece, TempBoard) :- 
+    piece_in(Board, Piece, Pos),
+    remove_piece(Board, Pos, TempBoard),
+    !.
 
 valid_piece_move(Board, Pos, (Pos-move)-MoveSet) :-
     orthogonal_move(Board, Pos, Move),
-    piece_in(Board, Piece, Pos),
-    setup_develop(Board, Pos, Move, TempBoard),  
+    setup_develop(Board, Pos, Move, Piece, TempBoard),  
     Move = RiverPos-_,
     full_develop(TempBoard, Piece, Move, [RiverPos], MoveSet).
 
