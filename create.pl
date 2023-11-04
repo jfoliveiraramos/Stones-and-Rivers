@@ -1,9 +1,11 @@
+:- use_module(library(random)).
+
 get_turn(player_a, 0).
 get_turn(player_b, 1).
 
-decide_first_turn(T) :-
+decide_first_turn(Player) :-
     random(0, 2, R),
-    get_turn(T, R).
+    get_turn(Player, R).
 
 create_row(Width, Row) :-
     findall(emptySlot, between(1, Width, _), Row).
@@ -41,19 +43,19 @@ povoate(Board, Width, Height, PlayerPieces, FinalBoard) :-
     put_pieces(Board3, squareStn, X, SquareY2, N, FinalBoard).
 
 
-% For Test Purposes
-create_board(_, _,[
-    [circleHrz, emptySlot, emptySlot, circleVrt],
-    [squareScr, emptySlot, emptySlot, emptySlot],
-    [squareScr, circleScr, circleStn, circleStn],
-    [squareStn, emptySlot, circleHrz, circleHrz]
-]) :- 
-    set_emptyBoard([
-        [emptySlot, emptySlot, emptySlot, emptySlot],
-        [squareScr, emptySlot, emptySlot, emptySlot],
-        [squareScr, circleScr, emptySlot, emptySlot],
-        [emptySlot, emptySlot, emptySlot, emptySlot]
-    ]), !.   
+%For Test Purposes
+% create_board(_, _,[
+%     [emptySlot, circleStn, emptySlot, emptySlot],
+%     [emptySlot, circleHrz, emptySlot, circleVrt],
+%     [squareScr, circleVrt, emptySlot, circleHrz],
+%     [squareStn, circleScr, circleScr, emptySlot]
+% ]) :- 
+%     set_emptyBoard([
+%         [emptySlot, emptySlot, emptySlot, emptySlot],
+%         [emptySlot, emptySlot, emptySlot, emptySlot],
+%         [squareScr, circleScr, emptySlot, emptySlot],
+%         [emptySlot, circleScr, circleScr, emptySlot]
+%     ]), !.   
 
 create_board(Width, Height, Board) :-
     create_plain_board(Width, Height, PlainBoard),
@@ -63,7 +65,7 @@ create_board(Width, Height, Board) :-
     povoate(EmptyBoard, Width, Height, PlayerPieces, Board).
 
 initial_state(Width/Height, match-MatchState) :- 
-    MatchState=Turn-Board,
+    MatchState=Player-Board,
     create_board(Width, Height, Board),
-    decide_first_turn(Turn).
+    decide_first_turn(Player).
 

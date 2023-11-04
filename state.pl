@@ -11,11 +11,11 @@ display_game(GameState) :-
     display_menu_options.
 
 display_game(GameState) :-
-    GameState = match-(Turn-Board),
+    GameState = match-(Player-Board),
     clear_screen,
     draw_board(Board),
     get_players(Players),
-    draw_turn(Turn, Players),
+    draw_turn(Player, Players),
     nl.
 
 display_game(GameState) :-

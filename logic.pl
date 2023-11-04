@@ -13,12 +13,6 @@ validate_piece([X-Y, Board, Turn]) :-
     piece_in(Board, Piece, X/Y),
     belongs_to(Piece, Turn).
 
-get_piece(Board, Turn, Piece, X/Y) :-
-    write('Provide the coordinates of the piece you wish to play, as follows: X-Y\n'),
-    read_input(X-Y, validate_piece, [Board, Turn], 'piece'),
-    piece_in(Board, Piece, X/Y),
-    !.
-
 replace_piece(Board, X/Y, NewPiece, NewBoard) :-
     nth0(Y, Board, Row, RestBoard),
     nth0(X, Row, _, RestRow), 
@@ -49,32 +43,6 @@ rotate(circleVrt, circleHrz) :- !.
 rotate(circleHrz, circleVrt) :- !.
 
 % -----------------------------------------------------
-right(X/Y, X1/Y) :- X1 is X + 1.
-left(X/Y, X1/Y) :- X1 is X - 1.
-up(X/Y, X/Y1) :- Y1 is Y - 1.
-down(X/Y, X/Y1) :- Y1 is Y + 1.
-
-% free_adjacent(Board, horizontal, Piece, Pos):-
-%     right(Pos, Right),
-%     can_move(Board, Piece, Right, Outcome), 
-%     Outcome \= pushMove,
-%     !.
-% free_adjacent(Board, horizontal, Piece, Pos):-
-%     left(Pos, Left),
-%     can_move(Board, Piece, Left, Outcome), 
-%     Outcome \= pushMove,
-%     !.
-    
-% free_adjacent(Board, vertical, Piece, Pos):-
-%     up(Pos, Up),
-%     can_move(Board, Piece, Up, Outcome), 
-%     Outcome \= pushMove,
-%     !.
-% free_adjacent(Board, vertical, Piece, Pos):-
-%     down(Pos, Down),
-%     can_move(Board, Piece, Down, Outcome), 
-%     Outcome \= pushMove,
-%     !.
 
 can_move_over(Piece, Pos) :-
     slot_in(Slot, Pos),
@@ -109,10 +77,15 @@ generate_orthogonal(X/Y, X1/Y1) :-  X1 is X, Y1 is Y - 1.
 generate_orthogonal(X/Y, X1/Y1) :-  X1 is X + 1, Y1 is Y.
 generate_orthogonal(X/Y, X1/Y1) :-  X1 is X - 1, Y1 is Y.
 
-orthogonal_move(Board, Pos1, Pos1-Pos2-Outcome) :-
+orthogonal_move(Board, Pos1, Pos2-Outcome) :-
     generate_orthogonal(Pos1, Pos2),
     piece_in(Board, Moving, Pos1),
     can_move(Board, Moving, Pos2, Outcome).
+
+right(X/Y, X1/Y) :- X1 is X + 1.
+left(X/Y, X1/Y) :- X1 is X - 1.
+up(X/Y, X/Y1) :- Y1 is Y - 1.
+down(X/Y, X/Y1) :- Y1 is Y + 1.
 
 get_direction_moves(Board, Piece, OgPos, Pos, Direction, [Move | Moves]) :-
     call(Direction, Pos, NewPos),
@@ -166,43 +139,158 @@ expand_move(Board, MainMove, Pushed, PushingRiver, MainMove-Moves) :-
     get_up_moves(Board, Pushed, Pos, Pos2, Moves1),
     get_down_moves(Board, Pushed, Pos, Pos2, Moves2),
     append(Moves1, Moves2, Moves).
+    
+initial_moves(Board, Pos, Moves) :-
+     findall(Move, orthogonal_move(Board, Pos, Move), Moves).
 
-setup_expand(FinalBoard, _-normalMove, _, _, FinalBoard) :- !.
+% setup_expand(FinalBoard, _-normalMove, _, _, FinalBoard) :- !.
 
-setup_expand(Board, Pos1-_-riverMove, Piece, _, FinalBoard) :-
-    piece_in(Board, Piece, Pos1),
-    remove_piece(Board, Pos1, FinalBoard),
+% setup_expand(Board, Pos1-_-riverMove, Piece, _, FinalBoard) :-
+%     piece_in(Board, Piece, Pos1),
+%     remove_piece(Board, Pos1, FinalBoard),
+%     !.
+
+% setup_expand(Board, Pos1-Pos2-pushMove, Piece, PushingRiver, FinalBoard) :-
+%     piece_in(Board, PushingRiver, Pos1),
+%     piece_in(Board, Piece, Pos2),
+%     remove_piece(Board, Pos1, TempBoard),
+%     replace_piece(TempBoard, Pos2, PushingRiver, FinalBoard).
+
+% limited_expand_move(Board, Move, Piece, PushingRiver, Move-FilteredMoves, VisitedRivers, UpdatedRivers):-
+%     expand_move(Board, Move, Piece, PushingRiver, Move-Moves),
+%     filter_visited_rivers(Moves, VisitedRivers, FilteredMoves, UpdatedRivers).
+
+% % expand_moves(_, [], _, []) :- !.
+% % expand_moves(Board, [Move | Moves], Piece, [ExpandedMove | ExpandedMoves]) :-
+% %     expand_move(Board, Move, Piece, ExpandedMove),
+% %     expand_moves(Board, Moves, Piece, ExpandedMoves).
+
+% full_expand_move(Board, Move, Piece, PushingRiver, Move-ExpandedMoves, VisitedRivers, UpdatedRivers2) :-
+%     limited_expand_move(Board, Move, Piece, PushingRiver, Move-Moves, VisitedRivers, UpdatedRivers1),
+%     full_expand_moves(Board, Moves, Piece, PushingRiver, ExpandedMoves, UpdatedRivers1, UpdatedRivers2).
+
+% full_expand_moves(_, [], _, []) :- !.
+% full_expand_moves(Board, [Move | Moves], Piece, PushingRiver, [ExpandedMove | ExpandedMoves], VisitedRivers, UpdatedRivers2) :-
+%     full_expand_move(Board, Move, Piece, PushingRiver, ExpandedMove, VisitedRivers, UpdatedRivers1),
+%     full_expand_moves(Board, Moves, Piece, PushingRiver, ExpandedMoves, UpdatedRivers1, UpdatedRivers2).
+
+% expand_first_moves(_, [], []) :- !.
+% expand_first_moves(Board, [Move | Moves], [ExpandedMove | ExpandedMoves], VisitedRivers) :-
+%     setup_expand(Board, Move, Piece, PushingRiver, TempBoard),
+%     full_expand_move(TempBoard, Move, Piece, PushingRiver, ExpandedMove, VisitedRivers, UpdatedRivers),
+%     expand_first_moves(Board, Moves, ExpandedMoves, UpdatedRivers).
+
+% all_moves(Board, Pos, Moves) :-
+%     findall(Move, orthogonal_move(Board, Pos, Move), InitialMoves),
+%     expand_first_moves(Board, InitialMoves, Moves, []).
+
+find_limit(Board, Piece, Direction, Pos, Limit) :- 
+    call(Direction, Pos, NewPos),
+    can_move(Board, Piece, NewPos, Outcome),
+    (Outcome = normalMove ; Outcome = riverMove),
+    !,
+    find_limit(Board, Piece, Direction, NewPos, Limit).
+
+find_limit(_, _, _, Limit, Limit).
+
+between_pos(RiverX/Y, Left/Y, left, X/Y) :-
+    Right is RiverX - 1,
+    between(Left, Right, X).
+
+between_pos(RiverX/Y, Right/Y, right, X/Y) :-
+    Left is RiverX + 1,
+    between(Left, Right, X).
+
+between_pos(X/RiverY, X/Up, up, X/Y) :-
+    Down is RiverY - 1,
+    between(Up, Down, Y).
+
+between_pos(X/RiverY, X/Down, down, X/Y) :-
+    Up is RiverY + 1,
+    between(Up, Down, Y).
+
+get_move_in_direction(Board, Piece, Direction, RiverPos, Limit, NewPos-Outcome) :-
+    between_pos(RiverPos, Limit, Direction, NewPos),
+    can_move(Board, Piece, NewPos, Outcome),
+    (Outcome = normalMove ; Outcome = riverMove).
+
+get_river_movement(Board, Piece, River, RiverPos, Move) :-
+    horizontal(River),
+    find_limit(Board, Piece, right, RiverPos, Limit),
+    get_move_in_direction(Board, Piece, right, RiverPos, Limit, Move).
+
+get_river_movement(Board, Piece, River, RiverPos, Move) :-
+    horizontal(River),
+    find_limit(Board, Piece, left, RiverPos, Limit),
+    get_move_in_direction(Board, Piece, left, RiverPos, Limit, Move).
+
+get_river_movement(Board, Piece, River, RiverPos, Move) :-
+    vertical(River),
+    find_limit(Board, Piece, up, RiverPos, Limit),
+    get_move_in_direction(Board, Piece, up, RiverPos, Limit, Move).
+
+get_river_movement(Board, Piece, River, RiverPos, Move) :-
+    vertical(River),
+    find_limit(Board, Piece, down, RiverPos, Limit),
+    get_move_in_direction(Board, Piece, down, RiverPos, Limit, Move).
+
+develop(Board, Piece, Pos-_, NewMove) :-
+    !,
+    piece_in(Board, River, Pos),
+    get_river_movement(Board, Piece, River, Pos, NewMove).
+
+
+river_verifier(RiverPos-riverMove, VisitedRivers, UpdatedRivers) :-
+    \+ memberchk(RiverPos, VisitedRivers),
+    !,
+    UpdatedRivers = [RiverPos | VisitedRivers].
+
+river_verifier(_-normalMove, VisitedRivers, VisitedRivers) :- !.
+
+full_develop(_, _, Pos-normalMove, _, [Pos-normalMove]) :- !.
+
+full_develop(Board, Piece, Move, VisitedRivers, [Move | Moves]) :-
+    develop(Board, Piece, Move, NewMove),
+    river_verifier(NewMove, VisitedRivers, UpdatedRivers),
+    full_develop(Board, Piece, NewMove, UpdatedRivers, Moves).
+
+setup_develop(Board, _, _-normalMove, Board) :- !.
+setup_develop(Board, Pos, _-riverMove, TempBoard) :-
+    remove_piece(Board, Pos, TempBoard),
+    !.
+setup_develop(Board, Pos, NewPos-pushMove, TempBoard) :-
+    piece_in(Board, PushingRiver, Pos),
+    remove_piece(Board, Pos, TempBoard1),
+    replace_piece(TempBoard1, NewPos, PushingRiver, TempBoard),
     !.
 
-setup_expand(Board, Pos1-Pos2-pushMove, Piece, PushingRiver, FinalBoard) :-
-    piece_in(Board, PushingRiver, Pos1),
-    piece_in(Board, Piece, Pos2),
-    remove_piece(Board, Pos1, TempBoard),
-    replace_piece(TempBoard, Pos2, PushingRiver, FinalBoard).
+valid_piece_move(Board, Pos, (Pos-move)-MoveSet) :-
+    orthogonal_move(Board, Pos, Move),
+    piece_in(Board, Piece, Pos),
+    setup_develop(Board, Pos, Move, TempBoard),  
+    Move = RiverPos-_,
+    full_develop(TempBoard, Piece, Move, [RiverPos], MoveSet).
 
-% expand_moves(_, [], _, []) :- !.
-% expand_moves(Board, [Move | Moves], Piece, [ExpandedMove | ExpandedMoves]) :-
-%     expand_move(Board, Move, Piece, ExpandedMove),
-%     expand_moves(Board, Moves, Piece, ExpandedMoves).
+valid_piece_move(Board, Pos, (Pos-flip)-vertical) :-
+    piece_in(Board, Piece, Pos),
+    stone(Piece).
 
-full_expand_move(Board, Move, Piece, PushingRiver, Move-ExpandedMoves) :-
-    expand_move(Board, Move, Piece, PushingRiver, Move-Moves),
-    full_expand_moves(Board, Moves, Piece, PushingRiver, ExpandedMoves).
+valid_piece_move(Board, Pos, (Pos-flip)-horizontal) :-
+    piece_in(Board, Piece, Pos),
+    stone(Piece).
 
-full_expand_moves(_, [], _, []) :- !.
-full_expand_moves(Board, [Move | Moves], Piece, PushingRiver, [ExpandedMove | ExpandedMoves]) :-
-    full_expand_move(Board, Move, Piece, PushingRiver, ExpandedMove),
-    full_expand_moves(Board, Moves, Piece, PushingRiver, ExpandedMoves).
+valid_piece_move(Board, Pos, (Pos-flip)-river) :-
+    piece_in(Board, Piece, Pos),
+    river(Piece).
 
-expand_first_moves(_, [], []) :- !.
-expand_first_moves(Board, [Move | Moves], [ExpandedMove | ExpandedMoves]) :-
-    setup_expand(Board, Move, Piece, PushingRiver, TempBoard),
-    full_expand_move(TempBoard, Move, Piece, PushingRiver, ExpandedMove),
-    expand_first_moves(Board, Moves, ExpandedMoves).
+valid_piece_move(Board, Pos, Pos-rotate) :-
+    piece_in(Board, Piece, Pos),
+    river(Piece).
 
-generate_moves(Board, Pos, Moves) :-
-    findall(Move, orthogonal_move(Board, Pos, Move), Moves).
-
-valid_moves(Board, Pos, Moves) :-
-    findall(Move, orthogonal_move(Board, Pos, Move), InitialMoves),
-    expand_first_moves(Board, InitialMoves, Moves).
+valid_move(Board, Player, Move):-
+    piece_in(Board, Piece, Pos),
+    belongs_to(Piece, Player),
+    valid_piece_move(Board, Pos, Move).
+    
+valid_moves(match-(Player-Board), Player, Moves) :-
+    findall(Move, valid_move(Board, Player, Move), Moves).

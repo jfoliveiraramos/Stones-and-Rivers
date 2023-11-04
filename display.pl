@@ -119,13 +119,13 @@ player(pc2, 'Computer (Hard)') :- !.
 player_type(player_a, A/_, Type) :- player(A, Type), !.
 player_type(player_b, _/B, Type) :- player(B, Type), !.
 
-turn_to_text(player_a, 'Player A') :- !.
-turn_to_text(player_b, 'Player B') :- !.
+player_to_text(player_a, 'Player A') :- !.
+player_to_text(player_b, 'Player B') :- !.
 
-draw_turn(Turn, Players):-
-    turn_to_text(Turn, TurnText),
-    player_type(Turn, Players, Type),
-    format('~w\'s turn - ~w\n\n', [TurnText, Type]).
+draw_turn(Player, Players):-
+    player_to_text(Player, PlayerText),
+    player_type(Player, Players, Type),
+    format('~w\'s turn - ~w\n\n', [PlayerText, Type]).
 
 display_settings(Width/Height-A/B) :-
     write('Current settings\n\n'),
@@ -144,7 +144,7 @@ display_menu_options :-
     nl.
 
 draw_winner(Winner) :-
-    turn_to_text(Winner, WinnerText),
+    player_to_text(Winner, WinnerText),
     format('Congratulations! ~w won the game!\n\n', [WinnerText]).
 
 display_gameOver_options :-

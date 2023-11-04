@@ -9,7 +9,7 @@ all_slots_occupied(Board, Slot) :-
     length(OccupiedSlots, Length),
     length(Slots, Length).
 
-game_over(match-(_-Board), Winner) :-
+game_over(match-(_-Board), Winner) :- 
     is_scorer_of(Winner, Slot),
     all_slots_occupied(Board, Slot).
     

@@ -9,7 +9,12 @@ set_emptyBoard(Board) :-
 :- dynamic player_type/2.
 
 player_type(player_a, hum).
-player_type(player_b, pc1).
+player_type(player_b, hum).
+
+is_human(Player) :- player_type(Player, hum).
+is_pc(Player) :- \+ is_human(Player).
+is_easy_pc(Player) :- player_type(Player, pc1).
+is_hard_pc(Player) :- player_type(Player, pc2).
 
 get_players(PlayerA/PlayerB) :-
     player_type(player_a, PlayerA),

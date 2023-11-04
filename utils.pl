@@ -28,4 +28,7 @@ read_input(Input, Validator, Arguments, OptionType) :-
     raw_input(Input, Validator, Arguments, OptionType),
     \+ is_cancel(Input).
 
-
+wait_for_input :-
+    write('Press ENTER to continue\n'),
+    skip_line,
+    get_char(_).
