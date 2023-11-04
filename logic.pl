@@ -224,21 +224,21 @@ setup_develop(Board, Pos, _, Piece, TempBoard) :-
     remove_piece(Board, Pos, TempBoard),
     !.
 
-valid_piece_move(Board, Pos, (Pos-move)-MoveSet) :-
+valid_piece_move(Board, Pos, Pos-(move-MoveSet)) :-
     orthogonal_move(Board, Pos, Move),
     setup_develop(Board, Pos, Move, Piece, TempBoard),  
     Move = RiverPos-_,
     full_develop(TempBoard, Piece, Move, [RiverPos], MoveSet).
 
-valid_piece_move(Board, Pos, (Pos-flip)-vertical) :-
+valid_piece_move(Board, Pos, Pos-(flip-vertical)) :-
     piece_in(Board, Piece, Pos),
     stone(Piece).
 
-valid_piece_move(Board, Pos, (Pos-flip)-horizontal) :-
+valid_piece_move(Board, Pos, Pos-(flip-horizontal)) :-
     piece_in(Board, Piece, Pos),
     stone(Piece).
 
-valid_piece_move(Board, Pos, (Pos-flip)-river) :-
+valid_piece_move(Board, Pos, Pos-(flip-river)) :-
     piece_in(Board, Piece, Pos),
     river(Piece).
 

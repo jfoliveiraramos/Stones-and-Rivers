@@ -29,8 +29,7 @@ display_game(quit) :- clear_screen.
 
 proceed(GameState, NewGameState) :-
     GameState = menu,
-    raw_input(Input, validate_option, [1-3]), nl,
-    menu_option(Input, NewGameState).
+    handle_menu(NewGameState).
 
 proceed(GameState, NewGameState) :-
     GameState = match-_,

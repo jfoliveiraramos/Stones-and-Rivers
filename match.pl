@@ -26,6 +26,7 @@ select_stone_play(Move) :-
     write('1. Move\n'),
     write('2. Flip to vertical river\n'),
     write('3. Flip to horizontal river\n\n'),
+    write('0. Go back\n'),
     read_input(Option, validate_option, [1-3]),
     play_stone_option(Option, Move), 
     !.
@@ -33,10 +34,10 @@ select_stone_play(Move) :-
 select_river_play(Move) :-
     nl,
     write('Select a move for the river\n'),
-    write('You may type 0 to cancel a move at any time.\n\n'),
     write('1. Move\n'),
     write('2. Flip to stone\n'),
     write('3. Rotate 90 degrees\n\n'),
+    write('0. Go back\n'),
     read_input(Option, validate_option, [1-3]),
     play_river_option(Option, Move), 
     !.
@@ -97,6 +98,7 @@ execute_followup(Board, Piece, FirstMove, Move, NewBoard) :-
     findall(NewMove, develop(Board, Piece, Move, NewMove), Moves),
     write('\nChoose one of the available moves for the selected piece.\n\n'),
     print_moves(Moves),
+    write('\n0. Cancel\n'),
     length(Moves, Length),
     read_input(Input, validate_option, [1-Length]),
     nth1(Input, Moves, NewMove),
@@ -133,27 +135,28 @@ move(match-(Player-Board), Pos-(flip-Direction), match-(Player-NewBoard)) :-
 move(match-(Player-Board), Pos-(move-player), match-(Player-NewBoard)) :-
     !,
     findall(Move, orthogonal_move(Board, Pos, Move), Moves),
-    write('\nChoose one of the available moves for the selected piece.\n\n'),
+    write('\nChoose one of the available moves for the selected piece.\n'),
     print_moves(Moves),
+    write('\n0. Cancel\n'),
     length(Moves, Length),
     read_input(Input, validate_option, [1-Length]),
     nth1(Input, Moves, Move),
     execute_move(Board, Pos, Move, NewBoard).
 
-move(match-(Player-Board), Pos-move-[FinalPos-normalMove], match-(Player-NewBoard)) :- 
+move(match-(Player-Board), Pos-(move-[FinalPos-normalMove]), match-(Player-NewBoard)) :- 
     !,
     piece_in(Board, Piece, Pos),
     remove_piece(Board, Pos, Board1),
     replace_piece(Board1, FinalPos, Piece, NewBoard).
 
-move(match-(Player-Board), Pos-move-[_-riverMove | Moves], match-(Player-NewBoard)) :- 
+move(match-(Player-Board), Pos-(move-[_-riverMove | Moves]), match-(Player-NewBoard)) :- 
     !,
     last(_, FinalPos-normalMove, Moves),
     piece_in(Board, Piece, Pos),
     remove_piece(Board, Pos, Board1),
     replace_piece(Board1, FinalPos, Piece, NewBoard).
 
-move(match-(Player-Board), Pos-move-[PushedPos-pushMove | Moves], match-(Player-NewBoard)) :- 
+move(match-(Player-Board), Pos-(move-[PushedPos-pushMove | Moves]), match-(Player-NewBoard)) :- 
     !,
     last(_, FinalPos-normalMove, Moves),
     piece_in(Board, Piece, PushedPos),

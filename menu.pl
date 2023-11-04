@@ -18,21 +18,33 @@ change_players(menu) :-
     write('Provide the new players in the following format A-B, where A is player A and B is player B\n\n'),
     write('| hum - Human\n'),
     write('| pc1 - Computer (Easy)\n'),
-    write('| pc2 - Computer (Hard)\n\n'),
+    write('| pc2 - Computer (Hard)\n'),
     write('Example: hum-pc2\n\n'),
-    read_input(A-B, validate_players, [], 'players'),
-    set_players(A/B).
+    write('You may type 0 to return to the menu.\n\n'),
+    read_input(Input, validate_players, [], 'players'),
+    Input = A-B,
+    set_players(A/B),
+    !.
+change_players(menu).
 
 change_board_size(menu) :-
     write('Provide the new board width and height in the following format width-height.\n'),
     write('| width is odd && width >= 5.\n'),
-    write('| height is even && height >= 10.\n\n'),
+    write('| height is even && height >= 10.\n'),
     write('Example: 13-14\n\n'),
-    read_input(Width-Height, validate_size, [], 'width and height'),
-    set_size(Width/Height).
+    write('You may type 0 to return to the menu.\n\n'),
+    read_input(Input, validate_size, [], 'width and height'),
+    Input = [Width-Height],
+    set_size(Width/Height),
+    !.
+change_board_size(menu).
+
+handle_menu(NewGameState) :-
+    raw_input(Input, validate_option, [1-3]), nl,
+    menu_option(Input, NewGameState), 
+    !.
 
 menu_option(1, NewGameState) :- !, start(NewGameState).
 menu_option(2, NewGameState) :- !, change_players(NewGameState).
 menu_option(3, NewGameState) :- !, change_board_size(NewGameState).
-menu_option(0, quit).
-
+menu_option(0, quit) :- !.

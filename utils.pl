@@ -7,7 +7,8 @@ validate(Input, Validator, Arguments) :- call(Validator, [Input | Arguments]).
 raw_input(Input, Validator, Arguments) :- raw_input(Input, Validator, Arguments, 'option').
 
 raw_input(Input, Validator, Arguments, _) :-
-    read(Input), 
+    read(Input),
+    skip_line,
     validate(Input, Validator, Arguments),
     !.
 
@@ -15,6 +16,7 @@ raw_input(Input, Validator, Arguments, OptionType) :-
     repeat,
     format('Invalid! Provide valid ~s.\n', [OptionType]),
     read(Input),
+    skip_line,
     validate(Input, Validator, Arguments),
     !.
 
@@ -29,6 +31,5 @@ read_input(Input, Validator, Arguments, OptionType) :-
     \+ is_cancel(Input).
 
 wait_for_input :-
-    write('Press ENTER to continue\n'),
-    skip_line,
+    write('Press ENTER to continue'),
     get_char(_).
