@@ -7,8 +7,8 @@ validate_size([Width-Height]) :-
     Height mod 2 =:= 0.
 
 validate_players([A-B]) :-
-    memberchk(A, [hum, pc1, pc2]),
-    memberchk(B, [hum, pc1, pc2]).
+    memberchk(A, [human, level1, level2]),
+    memberchk(B, [human, level1, level2]).
 
 start(NewGameState) :-
     get_size(Size),
@@ -16,10 +16,10 @@ start(NewGameState) :-
 
 change_players(menu) :-
     write('Provide the new players in the following format A-B, where A is player A and B is player B\n\n'),
-    write('| hum - Human\n'),
-    write('| pc1 - Computer (Easy)\n'),
-    write('| pc2 - Computer (Hard)\n'),
-    write('Example: hum-pc2\n\n'),
+    write('| human - Human\n'),
+    write('| level1 - Easy Bot\n'),
+    write('| level2 - Computer (Hard)\n'),
+    write('Example: human-level2\n\n'),
     write('You may type 0 to return to the menu.\n\n'),
     read_input(Input, validate_players, [], 'players'),
     Input = A-B,

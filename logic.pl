@@ -44,6 +44,10 @@ rotate(circleHrz, circleVrt) :- !.
 
 % -----------------------------------------------------
 
+free_slot(Board, SlotPos) :-
+    piece_in(Board, Piece, SlotPos),
+    \+ piece(Piece).
+
 can_move_over(Piece, Pos) :-
     slot_in(Slot, Pos),
     can_move_over_slot(Piece, Slot).

@@ -112,19 +112,19 @@ draw_board(Board) :-
     draw_rows(Board, H, 0),
     draw_bottom_x_axis(W).
 
-player(hum, 'Human') :- !.
-player(pc1, 'Computer (Easy)') :- !.
-player(pc2, 'Computer (Hard)') :- !.
+player(human, 'Human') :- !.
+player(level1, 'Bot (Easy)') :- !.
+player(level2, 'Bot (Hard)') :- !.
 
-player_type(player_a, A/_, Type) :- player(A, Type), !.
-player_type(player_b, _/B, Type) :- player(B, Type), !.
+player_type(Player, 'Human') :- is_human(Player), !.
+player_type(Player, 'Bot') :- is_bot(Player), !.
 
 player_to_text(player_a, 'Player A') :- !.
 player_to_text(player_b, 'Player B') :- !.
 
-draw_turn(Player, Players):-
+draw_turn(Player):-
     player_to_text(Player, PlayerText),
-    player_type(Player, Players, Type),
+    player_type(Player, Type),
     format('~w\'s turn - ~w\n\n', [PlayerText, Type]).
 
 display_settings(Width/Height-A/B) :-

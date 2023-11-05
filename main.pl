@@ -1,3 +1,4 @@
+:- ensure_loaded('bot.pl').
 :- ensure_loaded('create.pl').
 :- ensure_loaded('display.pl').
 :- ensure_loaded('gameover.pl').

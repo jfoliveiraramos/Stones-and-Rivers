@@ -14,8 +14,7 @@ display_game(GameState) :-
     GameState = match-(Player-Board),
     clear_screen,
     draw_board(Board),
-    get_players(Players),
-    draw_turn(Player, Players),
+    draw_turn(Player),
     nl.
 
 display_game(GameState) :-

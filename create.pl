@@ -45,16 +45,16 @@ povoate(Board, Width, Height, PlayerPieces, FinalBoard) :-
 
 %For Test Purposes
 % create_board(_, _,[
-%     [emptySlot, circleStn, emptySlot, emptySlot],
-%     [emptySlot, circleHrz, emptySlot, circleVrt],
-%     [squareScr, circleVrt, emptySlot, circleHrz],
-%     [squareStn, circleScr, circleScr, emptySlot]
+%     [emptySlot, circleScr, circleScr, circleScr],
+%     [emptySlot, emptySlot, squareStn, emptySlot],
+%     [emptySlot, emptySlot, emptySlot, squareStn],
+%     [squareScr, circleStn, circleStn, circleStn]
 % ]) :- 
 %     set_emptyBoard([
+%         [emptySlot, circleScr, circleScr, circleScr],
 %         [emptySlot, emptySlot, emptySlot, emptySlot],
 %         [emptySlot, emptySlot, emptySlot, emptySlot],
-%         [squareScr, circleScr, emptySlot, emptySlot],
-%         [emptySlot, circleScr, circleScr, emptySlot]
+%         [squareScr, emptySlot, emptySlot, emptySlot]
 %     ]), !.   
 
 create_board(Width, Height, Board) :-

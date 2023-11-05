@@ -11,13 +11,13 @@ horizontal(circleHrz) :- !.
 vertical(squareVrt) :- !.
 vertical(circleVrt) :- !.
 
-circle(circleStn) :- !.
-circle(circleVrt) :- !.
-circle(circleHrz) :- !.
+circle(circleStn).
+circle(circleVrt).
+circle(circleHrz).
 
-square(squareStn) :- !.
-square(squareVrt) :- !.
-square(squareHrz) :- !.
+square(squareStn).
+square(squareVrt).
+square(squareHrz).
 
 piece(Piece) :- stone(Piece) ; river(Piece).
 
@@ -28,8 +28,8 @@ can_move_over_slot(Piece, emptySlot) :- piece(Piece), !.
 can_move_over_slot(Piece, Slot) :- can_score(Piece, Slot), !.
 
 % belongs_to(_, _) :- !.
-belongs_to(Piece, player_b) :- circle(Piece), !.
-belongs_to(Piece, player_a) :- square(Piece), !.
+belongs_to(Piece, player_b) :- circle(Piece).
+belongs_to(Piece, player_a) :- square(Piece).
 
 is_scorer_of(player_b, circleScr).
 is_scorer_of(player_a, squareScr).

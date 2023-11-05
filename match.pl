@@ -1,6 +1,7 @@
 
 :- use_module(library(lists)).
 :- use_module(library(random)).
+:- ensure_loaded('bot.pl').
 :- ensure_loaded('logic.pl').
 :- ensure_loaded('settings.pl').
 :- ensure_loaded('utils.pl').
@@ -174,12 +175,11 @@ move(match-(Player-Board), Pos-(move-[PushedPos-pushMove | Moves]), match-(Playe
 
 handle_turn(GameState, NewGameState) :-
     GameState = match-(Player-_),
-    is_pc(Player),
+    is_bot(Player),
+    player_level(Player, Level),
     wait_for_input,
-    valid_moves(GameState, Player, Moves),
-    length(Moves, Length),
-    random(0, Length, Index),
-    nth0(Index, Moves, Move),
+    write('\n\nBot is thinking...\n'),
+    choose_move(GameState, Player, Level, Move),
     move(GameState, Move, GameState1),
     switch_turn(GameState1, NewGameState),
     !.

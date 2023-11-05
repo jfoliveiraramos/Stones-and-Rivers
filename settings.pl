@@ -6,23 +6,23 @@ set_emptyBoard(Board) :-
     retractall(emptyBoard(_)),
     assert(emptyBoard(Board)).
 
-:- dynamic player_type/2.
+:- dynamic player_level/2.
 
-player_type(player_a, hum).
-player_type(player_b, hum).
+player_level(player_a, human).
+player_level(player_b, human).
 
-is_human(Player) :- player_type(Player, hum).
-is_pc(Player) :- \+ is_human(Player).
-is_easy_pc(Player) :- player_type(Player, pc1).
-is_hard_pc(Player) :- player_type(Player, pc2).
+is_human(Player) :- player_level(Player, human).
+is_bot(Player) :- \+ is_human(Player).
+is_easy(Player) :- player_level(Player, level1).
+is_hard(Player) :- player_level(Player, level2).
 
 get_players(PlayerA/PlayerB) :-
-    player_type(player_a, PlayerA),
-    player_type(player_b, PlayerB).
+    player_level(player_a, PlayerA),
+    player_level(player_b, PlayerB).
 
 set_player(Player, Type) :-
-    retractall(player_type(Player, _)),
-    assert(player_type(Player, Type)).
+    retractall(player_level(Player, _)),
+    assert(player_level(Player, Type)).
 
 set_players(PlayerA/PlayerB) :-
     set_player(player_a, PlayerA),
