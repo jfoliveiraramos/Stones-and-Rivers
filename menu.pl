@@ -34,7 +34,7 @@ change_board_size(menu) :-
     write('Example: 13-14\n\n'),
     write('You may type 0 to return to the menu.\n\n'),
     read_input(Input, validate_size, [], 'width and height'),
-    Input = [Width-Height],
+    Input = Width-Height,
     set_size(Width/Height),
     !.
 change_board_size(menu).
